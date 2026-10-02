@@ -314,7 +314,7 @@ possible contribution — please open an issue with the specific calculation and
 
 ## License
 
-MIT.
+MIT. Copyright (c) 2026 Ishaan Burra.
 
 ---
 

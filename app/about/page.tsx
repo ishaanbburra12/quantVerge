@@ -14,6 +14,7 @@ export default function AboutPage() {
         eyebrow="About"
         title="About QuantVerge"
         description="A learning platform and long-term quantitative finance project, built to understand how mathematical models of markets behave and where they break."
+        meta={<Badge tone="neutral">Built by Ishaan Burra</Badge>}
       />
 
       <Section>
@@ -23,8 +24,8 @@ export default function AboutPage() {
               <CardBody className="space-y-3">
                 <h2 className="text-sm font-semibold text-ink">Why this exists</h2>
                 <p className="max-w-prose text-sm leading-relaxed text-ink-muted">
-                  I built QuantVerge to explore how mathematics, computer science, statistics and modelling can be
-                  used to understand financial systems. The aim was never to find a trading strategy. It was to
+                  I&rsquo;m Ishaan Burra, and I built QuantVerge to explore how mathematics, computer science,
+                  statistics and modelling can be used to understand financial systems. The aim was never to find a trading strategy. It was to
                   understand what these models actually say, what they assume, and how to tell the difference
                   between a result and an accident.
                 </p>

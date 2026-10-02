@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     "quantitative finance", "Monte Carlo simulation", "portfolio optimisation", "Black-Scholes",
     "market regimes", "backtesting", "overfitting", "value at risk", "educational",
   ],
-  authors: [{ name: "QuantVerge" }],
+  authors: [{ name: "Ishaan Burra" }],
   openGraph: {
     title: "QuantVerge — Experiment with the mathematics behind markets",
     description:
