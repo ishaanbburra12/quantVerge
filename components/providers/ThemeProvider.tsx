@@ -11,7 +11,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue>({ theme: "dark", toggleTheme: () => {} });
 
-const STORAGE_KEY = "quantlab.theme";
+const STORAGE_KEY = "quantverge.theme";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   // Start at "dark" to match the server-rendered markup. Reading localStorage

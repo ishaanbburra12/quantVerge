@@ -534,7 +534,7 @@ export function FixedIncomeLab({ lab, initialParams }: { lab: LabMeta; initialPa
         exports={[
           {
             label: "Export cash flows (CSV)",
-            filename: `quantlab-bond-${params.maturity}y-${(params.couponRate * 100).toFixed(2)}.csv`,
+            filename: `quantverge-bond-${params.maturity}y-${(params.couponRate * 100).toFixed(2)}.csv`,
             mime: "text/csv",
             build: () =>
               toCSV(
@@ -551,7 +551,7 @@ export function FixedIncomeLab({ lab, initialParams }: { lab: LabMeta; initialPa
           },
           {
             label: "Export analysis (JSON)",
-            filename: `quantlab-bond-${params.maturity}y.json`,
+            filename: `quantverge-bond-${params.maturity}y.json`,
             mime: "application/json",
             build: () =>
               JSON.stringify(

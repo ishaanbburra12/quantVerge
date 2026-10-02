@@ -9,7 +9,7 @@ import { MODULES } from "@/content/lessons";
  * from, so a new lab or lesson appears here automatically. A hand-maintained
  * sitemap drifts out of date the first time someone forgets to update it.
  */
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://quantlab.example";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://quantverge.example";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();

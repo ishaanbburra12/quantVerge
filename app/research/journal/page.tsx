@@ -5,7 +5,7 @@ import { JOURNAL_POSTS } from "@/content/journal";
 
 export const metadata = {
   title: "Research journal",
-  description: "Working notes from building QuantLab: why backtests lie, what transaction costs do, and what makes a market learnable.",
+  description: "Working notes from building QuantVerge: why backtests lie, what transaction costs do, and what makes a market learnable.",
 };
 
 export default function JournalPage() {

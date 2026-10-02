@@ -3,7 +3,7 @@ import { Card, CardBody, Badge, Callout } from "@/components/ui";
 
 export const metadata = {
   title: "References",
-  description: "Sources used while building QuantLab, with verification status marked explicitly.",
+  description: "Sources used while building QuantVerge, with verification status marked explicitly.",
 };
 
 interface Reference {
@@ -97,7 +97,7 @@ export default function ReferencesPage() {
       <PageHeader
         eyebrow="Reference"
         title="References"
-        description="Sources consulted while building QuantLab. Each is marked with whether it was verified during this build — anything that could not be confirmed says so rather than being presented as certain."
+        description="Sources consulted while building QuantVerge. Each is marked with whether it was verified during this build — anything that could not be confirmed says so rather than being presented as certain."
         meta={
           <>
             <Badge tone="positive">{verified} verified</Badge>

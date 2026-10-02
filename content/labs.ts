@@ -135,7 +135,7 @@ export const LABS: LabMeta[] = [
     title: "Probability Playground",
     tagline: "Coin flips, dice, Bayes, and the two limit theorems everything rests on.",
     description:
-      "The law of large numbers and the central limit theorem, demonstrated by simulation rather than asserted. Start here if the rest of QuantLab assumes things you have not met yet.",
+      "The law of large numbers and the central limit theorem, demonstrated by simulation rather than asserted. Start here if the rest of QuantVerge assumes things you have not met yet.",
     difficulty: 1,
     concepts: ["Law of large numbers", "Central limit theorem", "Bayes' theorem", "Expected value", "Variance"],
     minutes: 15,

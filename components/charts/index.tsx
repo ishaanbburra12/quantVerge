@@ -26,7 +26,7 @@ const AXIS_PROPS = {
  * or SVG chart conveys nothing to a screen reader, so each one carries a
  * role="img" wrapper with a written summary of what the picture shows. That is
  * also why every chart below pairs with a numeric readout somewhere on the page:
- * no information in QuantLab exists only as a shape.
+ * no information in QuantVerge exists only as a shape.
  */
 export function ChartFrame({
   title,

@@ -619,7 +619,7 @@ export function PortfolioLab({ lab, initialParams }: { lab: LabMeta; initialPara
             ? [
                 {
                   label: "Export random portfolios (CSV)",
-                  filename: `quantlab-portfolios-${params.seed}.csv`,
+                  filename: `quantverge-portfolios-${params.seed}.csv`,
                   mime: "text/csv",
                   build: () =>
                     toCSV(
@@ -634,7 +634,7 @@ export function PortfolioLab({ lab, initialParams }: { lab: LabMeta; initialPara
                 },
                 {
                   label: "Export analysis (JSON)",
-                  filename: `quantlab-portfolio-${params.seed}.json`,
+                  filename: `quantverge-portfolio-${params.seed}.json`,
                   mime: "application/json",
                   build: () =>
                     JSON.stringify(

@@ -6,7 +6,7 @@ import { ResearchModeProvider } from "@/components/providers/ResearchModeProvide
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://quantlab.example";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://quantverge.example";
 
 export const metadata: Metadata = {
   // metadataBase lets Next resolve relative Open Graph and canonical URLs. Without
@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   // follow.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "QuantLab — Experiment with the mathematics behind markets",
-    template: "%s — QuantLab",
+    default: "QuantVerge — Experiment with the mathematics behind markets",
+    template: "%s — QuantVerge",
   },
   description:
     "An interactive laboratory for probability, statistics, portfolio theory, market simulation, risk and quantitative research. Educational and research-oriented; not investment advice.",
@@ -23,18 +23,18 @@ export const metadata: Metadata = {
     "quantitative finance", "Monte Carlo simulation", "portfolio optimisation", "Black-Scholes",
     "market regimes", "backtesting", "overfitting", "value at risk", "educational",
   ],
-  authors: [{ name: "QuantLab" }],
+  authors: [{ name: "QuantVerge" }],
   openGraph: {
-    title: "QuantLab — Experiment with the mathematics behind markets",
+    title: "QuantVerge — Experiment with the mathematics behind markets",
     description:
       "An interactive laboratory for probability, statistics, portfolio theory, market simulation, risk and quantitative research.",
     type: "website",
-    siteName: "QuantLab",
+    siteName: "QuantVerge",
     locale: "en_GB",
   },
   twitter: {
     card: "summary_large_image",
-    title: "QuantLab — Experiment with the mathematics behind markets",
+    title: "QuantVerge — Experiment with the mathematics behind markets",
     description:
       "Ten interactive labs for probability, portfolio theory, risk and quantitative research. Educational and research-oriented; not investment advice.",
   },

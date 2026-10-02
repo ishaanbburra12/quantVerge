@@ -743,7 +743,7 @@ export function RegimeLab({ lab, initialParams }: { lab: LabMeta; initialParams:
         exports={[
           {
             label: "Export series (CSV)",
-            filename: `quantlab-regimes-${params.seed}.csv`,
+            filename: `quantverge-regimes-${params.seed}.csv`,
             mime: "text/csv",
             build: () =>
               toCSV(
@@ -760,7 +760,7 @@ export function RegimeLab({ lab, initialParams }: { lab: LabMeta; initialParams:
           },
           {
             label: "Export configuration (JSON)",
-            filename: `quantlab-regimes-${params.seed}.json`,
+            filename: `quantverge-regimes-${params.seed}.json`,
             mime: "application/json",
             build: () =>
               JSON.stringify(

@@ -12,7 +12,7 @@
  * mean, and the sample mean sits closer to your own data than the truth does.
  * Dividing by (n - 1) corrects that bias. This is Bessel's correction.
  *
- * QuantLab defaults to the sample versions, because QuantLab always works with
+ * QuantVerge defaults to the sample versions, because QuantVerge always works with
  * samples.
  */
 

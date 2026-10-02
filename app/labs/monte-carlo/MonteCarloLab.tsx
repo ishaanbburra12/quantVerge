@@ -940,7 +940,7 @@ export function MonteCarloLab({ lab, initialParams }: { lab: LabMeta; initialPar
             ? [
                 {
                   label: "Export ending prices (CSV)",
-                  filename: `quantlab-montecarlo-${params.seed}.csv`,
+                  filename: `quantverge-montecarlo-${params.seed}.csv`,
                   mime: "text/csv",
                   build: () =>
                     toCSV(
@@ -953,7 +953,7 @@ export function MonteCarloLab({ lab, initialParams }: { lab: LabMeta; initialPar
                 },
                 {
                   label: "Export configuration (JSON)",
-                  filename: `quantlab-montecarlo-${params.seed}.json`,
+                  filename: `quantverge-montecarlo-${params.seed}.json`,
                   mime: "application/json",
                   build: () =>
                     JSON.stringify(

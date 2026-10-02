@@ -676,7 +676,7 @@ export function BacktestLab({ lab, initialParams }: { lab: LabMeta; initialParam
         exports={[
           {
             label: "Export equity curves (CSV)",
-            filename: `quantlab-backtest-${params.seed}.csv`,
+            filename: `quantverge-backtest-${params.seed}.csv`,
             mime: "text/csv",
             build: () =>
               toCSV(
@@ -695,7 +695,7 @@ export function BacktestLab({ lab, initialParams }: { lab: LabMeta; initialParam
           },
           {
             label: "Export results (JSON)",
-            filename: `quantlab-backtest-${params.seed}.json`,
+            filename: `quantverge-backtest-${params.seed}.json`,
             mime: "application/json",
             build: () =>
               JSON.stringify(

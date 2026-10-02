@@ -42,7 +42,7 @@ export function Footer() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <p className="text-sm font-semibold text-ink">
-              Quant<span className="text-accent">Lab</span>
+              Quant<span className="text-accent">Verge</span>
             </p>
             <p className="mt-2 max-w-xs text-xs leading-relaxed text-ink-muted">
               An interactive laboratory for the mathematics behind markets. Every number on this site is
@@ -67,7 +67,7 @@ export function Footer() {
 
         <div className="mt-9 border-t border-line pt-5">
           <p className="max-w-3xl text-2xs leading-relaxed text-ink-faint">
-            <strong className="font-semibold text-ink-muted">Educational disclaimer.</strong> QuantLab is an
+            <strong className="font-semibold text-ink-muted">Educational disclaimer.</strong> QuantVerge is an
             educational and research platform. The simulations and models shown here are simplified
             representations of financial markets and should not be interpreted as investment advice. Nothing on
             this site predicts market prices. All market data is synthetic unless explicitly stated otherwise.

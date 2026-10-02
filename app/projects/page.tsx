@@ -4,7 +4,7 @@ import { Card, CardBody, Badge, Callout } from "@/components/ui";
 
 export const metadata = {
   title: "Projects",
-  description: "The components of QuantLab, with their research questions, methods, current status and results.",
+  description: "The components of QuantVerge, with their research questions, methods, current status and results.",
 };
 
 type Status = "Built and tested" | "Framework only" | "Planned";

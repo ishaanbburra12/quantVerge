@@ -473,7 +473,7 @@ export function CorrelationLab({ lab, initialParams }: { lab: LabMeta; initialPa
             ? [
                 {
                   label: "Export returns (CSV)",
-                  filename: `quantlab-correlation-${params.seed}.csv`,
+                  filename: `quantverge-correlation-${params.seed}.csv`,
                   mime: "text/csv",
                   build: () =>
                     toCSV(
@@ -488,7 +488,7 @@ export function CorrelationLab({ lab, initialParams }: { lab: LabMeta; initialPa
                 },
                 {
                   label: "Export analysis (JSON)",
-                  filename: `quantlab-correlation-${params.seed}.json`,
+                  filename: `quantverge-correlation-${params.seed}.json`,
                   mime: "application/json",
                   build: () =>
                     JSON.stringify(

@@ -5,7 +5,7 @@ import { EXPERIMENTS, STATUS_TONE } from "@/content/experiments";
 export const metadata = {
   title: "Experiment log",
   description:
-    "Every experiment run while building QuantLab, including the failures and the ones that needed revision. Failed experiments stay visible.",
+    "Every experiment run while building QuantVerge, including the failures and the ones that needed revision. Failed experiments stay visible.",
 };
 
 export default function ExperimentLogPage() {

@@ -202,7 +202,7 @@ export const LESSONS: Lesson[] = [
     intuition:
       "Computer randomness is not random — it is a deterministic sequence that passes statistical tests for randomness. The seed selects which sequence you get. This is a feature, not a limitation: it makes simulated experiments repeatable in a way physical experiments can only aspire to.",
     formulaNote:
-      "Every generator in QuantLab takes an explicit seed, and every lab exposes it. Nothing on this site produces a number that cannot be regenerated.",
+      "Every generator in QuantVerge takes an explicit seed, and every lab exposes it. Nothing on this site produces a number that cannot be regenerated.",
     example: {
       prompt: "Why should you rerun an experiment with several different seeds?",
       working: [

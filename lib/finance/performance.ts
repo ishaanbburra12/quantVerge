@@ -1,7 +1,7 @@
 /**
  * Return series and performance / risk metrics.
  *
- * Conventions used consistently across QuantLab:
+ * Conventions used consistently across QuantVerge:
  *   - A "price series" is a list of levels (prices, or portfolio equity).
  *   - A "return series" has one FEWER element than the price series it came
  *     from: n prices produce n-1 returns.

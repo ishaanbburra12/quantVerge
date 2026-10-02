@@ -188,7 +188,7 @@ export const CHALLENGES: Challenge[] = [
       "That would wrongly identify the peak as occurring AFTER the trough — a chronological impossibility.",
     ],
     answer:
-      "50%, from index 0 to index 1. The algorithm must record the peak that was in force at the moment the worst decline occurred, not the largest value in the whole series. This test case is in QuantLab's test suite precisely because the naive implementation passes every monotonic example and fails this one.",
+      "50%, from index 0 to index 1. The algorithm must record the peak that was in force at the moment the worst decline occurred, not the largest value in the whole series. This test case is in QuantVerge's test suite precisely because the naive implementation passes every monotonic example and fails this one.",
     simulation: "The Risk Analyzer marks the responsible peak and trough on the equity curve.",
   },
   {

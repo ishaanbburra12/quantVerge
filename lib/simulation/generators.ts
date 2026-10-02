@@ -1,7 +1,7 @@
 /**
  * Synthetic data generators.
  *
- * Every lab in QuantLab runs on synthetic data by design, not as a shortcut.
+ * Every lab in QuantVerge runs on synthetic data by design, not as a shortcut.
  * With synthetic data you KNOW the true data-generating process, so you can ask
  * the question that real data can never answer: does my estimator actually
  * recover the truth? If a method cannot detect momentum in a series you built

@@ -5,7 +5,7 @@ import { GLOSSARY, GLOSSARY_CATEGORIES } from "@/content/glossary";
 
 export const metadata = {
   title: "Glossary",
-  description: "Definitions of the terms used throughout QuantLab, each with a note on the caveat that matters most.",
+  description: "Definitions of the terms used throughout QuantVerge, each with a note on the caveat that matters most.",
 };
 
 export default function GlossaryPage() {

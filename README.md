@@ -1,4 +1,4 @@
-# QuantLab
+# QuantVerge
 
 **Experiment with the mathematics behind markets.**
 
@@ -6,7 +6,7 @@ An interactive laboratory for probability, statistics, portfolio theory, market 
 quantitative research. Ten labs, 28 lessons, and a research framework — all computing in the browser,
 all reproducible from a seed.
 
-> **Educational disclaimer.** QuantLab is an educational and research platform. The simulations and
+> **Educational disclaimer.** QuantVerge is an educational and research platform. The simulations and
 > models shown here are simplified representations of financial markets and should not be interpreted
 > as investment advice. Nothing on this site predicts market prices. All data is synthetic.
 
@@ -18,7 +18,7 @@ Not a stock-market website. There are no live prices, no news feed, and no recom
 
 The organising question is deliberately different from the usual one:
 
-> Instead of asking which stock will go up, QuantLab asks how mathematical models behave, what
+> Instead of asking which stock will go up, QuantVerge asks how mathematical models behave, what
 > assumptions they depend on, and when those assumptions break.
 
 Every lab follows the same nine-part structure, enforced by the component that renders it rather than
@@ -102,7 +102,7 @@ comparisons. The rigorous material is always in the page — Research Mode only 
 ## Architecture
 
 ```
-quantlab/
+quantverge/
 ├── app/                        # Next.js App Router
 │   ├── labs/<slug>/            # One directory per lab: page.tsx (server) + Lab.tsx (client)
 │   ├── learn/[slug]/           # Lesson pages, statically generated
@@ -180,7 +180,7 @@ Requires Node 18.18+ (developed on Node 22).
 
 ```bash
 git clone <repository-url>
-cd quantlab
+cd quantverge
 npm install
 ```
 
@@ -289,7 +289,7 @@ understated rather than overstated.
 
 **Done** — design system, navigation, all twelve labs, 28 lessons, 10 code walkthroughs, glossary,
 challenges, research framework, experiment log, journal, Research Mode, reproducibility layer,
-sitemap and robots, WCAG AA contrast throughout, 272 tests.
+sitemap and robots, WCAG AA contrast throughout, 349 tests.
 
 **Known gaps, in priority order** — PCA and eigendecomposition; CAPM and Fama-French factor
 models; GARCH volatility modelling; binomial trees and American exercise; maximum likelihood

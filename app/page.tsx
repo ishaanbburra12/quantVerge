@@ -43,7 +43,7 @@ export default function HomePage() {
                 Quantitative research laboratory
               </p>
               <h1 className="mt-4 text-4xl font-semibold tracking-[-0.02em] text-ink sm:text-5xl">
-                QUANT<span className="text-accent">LAB</span>
+                QUANT<span className="text-accent">VERGE</span>
               </h1>
               <p className="mt-4 text-lg font-medium leading-snug text-ink sm:text-xl">
                 Experiment with the mathematics behind markets.
@@ -69,7 +69,7 @@ export default function HomePage() {
               </div>
 
               <p className="mt-7 max-w-md border-l-2 border-line pl-3 text-xs leading-relaxed text-ink-faint">
-                Instead of asking which stock will go up, QuantLab asks how mathematical models behave, what
+                Instead of asking which stock will go up, QuantVerge asks how mathematical models behave, what
                 assumptions they depend on, and when those assumptions break.
               </p>
             </div>
@@ -87,7 +87,7 @@ export default function HomePage() {
           {[
             {
               title: "Everything is computed",
-              body: "No hard-coded results. Every statistic on this site is calculated in your browser from the parameters you choose, by functions covered by a test suite of 272 numerical tests.",
+              body: "No hard-coded results. Every statistic on this site is calculated in your browser from the parameters you choose, by functions covered by a test suite of 349 numerical tests.",
             },
             {
               title: "Everything is reproducible",

@@ -601,7 +601,7 @@ export function InferenceLab({ lab, initialParams }: { lab: LabMeta; initialPara
         exports={[
           {
             label: "Export p-values (CSV)",
-            filename: `quantlab-inference-${params.seed}.csv`,
+            filename: `quantverge-inference-${params.seed}.csv`,
             mime: "text/csv",
             build: () =>
               toCSV(
@@ -615,7 +615,7 @@ export function InferenceLab({ lab, initialParams }: { lab: LabMeta; initialPara
           },
           {
             label: "Export analysis (JSON)",
-            filename: `quantlab-inference-${params.seed}.json`,
+            filename: `quantverge-inference-${params.seed}.json`,
             mime: "application/json",
             build: () =>
               JSON.stringify(

@@ -121,7 +121,7 @@ export function configToText(
   for (const [key, value] of Object.entries(config)) {
     lines.push(`${labels[key] ?? key}: ${value}`);
   }
-  lines.push("", "Reproduce by entering these values into the same lab in QuantLab.");
+  lines.push("", "Reproduce by entering these values into the same lab in QuantVerge.");
   return lines.join("\n");
 }
 

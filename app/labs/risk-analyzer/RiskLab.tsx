@@ -717,7 +717,7 @@ export function RiskLab({ lab, initialParams }: { lab: LabMeta; initialParams: R
         exports={[
           {
             label: "Export returns (CSV)",
-            filename: `quantlab-risk-${params.process}-${params.seed}.csv`,
+            filename: `quantverge-risk-${params.process}-${params.seed}.csv`,
             mime: "text/csv",
             build: () =>
               toCSV(
@@ -731,7 +731,7 @@ export function RiskLab({ lab, initialParams }: { lab: LabMeta; initialParams: R
           },
           {
             label: "Export metrics (JSON)",
-            filename: `quantlab-risk-${params.process}-${params.seed}.json`,
+            filename: `quantverge-risk-${params.process}-${params.seed}.json`,
             mime: "application/json",
             build: () =>
               JSON.stringify(

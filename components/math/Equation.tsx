@@ -8,7 +8,7 @@ import { useMemo } from "react";
  *
  * `katex.renderToString` is called with `throwOnError: false` so that a
  * malformed expression degrades to visible red source text instead of crashing
- * the page. The output is trusted here because every expression in QuantLab is
+ * the page. The output is trusted here because every expression in QuantVerge is
  * authored in this repository — none of it comes from user input — and KaTeX's
  * own output is HTML-escaped.
  */
@@ -49,7 +49,7 @@ export function InlineMath({ children }: { children: string }) {
  *
  * Presenting a formula without a legend is the most common way technical writing
  * fails a learner: the reader can see the shape of the expression but has no way
- * in. Every equation in QuantLab that introduces new notation carries one.
+ * in. Every equation in QuantVerge that introduces new notation carries one.
  */
 export function EquationBlock({
   equation,

@@ -1,7 +1,7 @@
 /**
  * Seeded pseudo-random number generation.
  *
- * Reproducibility is a hard requirement for every experiment in QuantLab: the
+ * Reproducibility is a hard requirement for every experiment in QuantVerge: the
  * same seed and the same parameters must always produce the same numbers. The
  * browser's `Math.random()` cannot do that — it has no seed — so we implement
  * our own generator.

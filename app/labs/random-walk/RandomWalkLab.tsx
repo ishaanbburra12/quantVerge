@@ -517,7 +517,7 @@ export function RandomWalkLab({ lab, initialParams }: { lab: LabMeta; initialPar
         exports={[
           {
             label: "Export series (CSV)",
-            filename: `quantlab-randomwalk-${params.mode}-${params.seed}.csv`,
+            filename: `quantverge-randomwalk-${params.mode}-${params.seed}.csv`,
             mime: "text/csv",
             build: () =>
               toCSV(
@@ -532,7 +532,7 @@ export function RandomWalkLab({ lab, initialParams }: { lab: LabMeta; initialPar
           },
           {
             label: "Export diagnostics (JSON)",
-            filename: `quantlab-randomwalk-${params.mode}-${params.seed}.json`,
+            filename: `quantverge-randomwalk-${params.mode}-${params.seed}.json`,
             mime: "application/json",
             build: () =>
               JSON.stringify(

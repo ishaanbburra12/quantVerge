@@ -672,7 +672,7 @@ export function OverfittingLab({ lab, initialParams }: { lab: LabMeta; initialPa
         exports={[
           {
             label: "Export parameter grid (CSV)",
-            filename: `quantlab-overfitting-${params.seed}.csv`,
+            filename: `quantverge-overfitting-${params.seed}.csv`,
             mime: "text/csv",
             build: () =>
               toCSV(
@@ -689,7 +689,7 @@ export function OverfittingLab({ lab, initialParams }: { lab: LabMeta; initialPa
           },
           {
             label: "Export findings (JSON)",
-            filename: `quantlab-overfitting-${params.seed}.json`,
+            filename: `quantverge-overfitting-${params.seed}.json`,
             mime: "application/json",
             build: () =>
               JSON.stringify(

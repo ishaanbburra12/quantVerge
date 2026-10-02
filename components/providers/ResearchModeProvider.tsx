@@ -22,7 +22,7 @@ const ResearchModeContext = createContext<ResearchModeContextValue>({
   toggleResearchMode: () => {},
 });
 
-const STORAGE_KEY = "quantlab.researchMode";
+const STORAGE_KEY = "quantverge.researchMode";
 
 export function ResearchModeProvider({ children }: { children: ReactNode }) {
   const [researchMode, setResearchMode] = useState(false);

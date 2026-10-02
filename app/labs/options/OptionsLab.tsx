@@ -671,7 +671,7 @@ export function OptionsLab({ lab, initialParams }: { lab: LabMeta; initialParams
         exports={[
           {
             label: "Export price curve (CSV)",
-            filename: `quantlab-options-${params.optionType}.csv`,
+            filename: `quantverge-options-${params.optionType}.csv`,
             mime: "text/csv",
             build: () =>
               toCSV(
@@ -685,7 +685,7 @@ export function OptionsLab({ lab, initialParams }: { lab: LabMeta; initialParams
           },
           {
             label: "Export pricing (JSON)",
-            filename: `quantlab-options-${params.optionType}.json`,
+            filename: `quantverge-options-${params.optionType}.json`,
             mime: "application/json",
             build: () =>
               JSON.stringify(

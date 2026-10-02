@@ -689,7 +689,7 @@ export function ProbabilityLab({ lab, initialParams }: { lab: LabMeta; initialPa
         exports={[
           {
             label: "Export data (CSV)",
-            filename: `quantlab-probability-${params.experiment}-${params.seed}.csv`,
+            filename: `quantverge-probability-${params.experiment}-${params.seed}.csv`,
             mime: "text/csv",
             build: () => {
               if (params.experiment === "clt") {

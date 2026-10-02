@@ -39,7 +39,7 @@ const ITEMS = [
     tone: "neutral" as const,
     title: "References",
     summary:
-      "Sources used while building QuantLab, with verification status marked explicitly. Anything that could not be verified is labelled rather than invented.",
+      "Sources used while building QuantVerge, with verification status marked explicitly. Anything that could not be verified is labelled rather than invented.",
   },
 ];
 

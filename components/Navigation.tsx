@@ -39,10 +39,10 @@ export function Navigation() {
       </a>
 
       <div className="mx-auto flex h-14 max-w-content items-center gap-4 px-4 sm:px-6">
-        <Link href="/" className="group flex shrink-0 items-center gap-2" aria-label="QuantLab home">
+        <Link href="/" className="group flex shrink-0 items-center gap-2" aria-label="QuantVerge home">
           <LogoMark />
           <span className="text-sm font-semibold tracking-tight text-ink">
-            Quant<span className="text-accent">Lab</span>
+            Quant<span className="text-accent">Verge</span>
           </span>
         </Link>
 
