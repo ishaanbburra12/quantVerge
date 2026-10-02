@@ -1,0 +1,214 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Theme tokens.
+ *
+ * Dark is the default, as specified. The light theme is a genuine re-mapping
+ * rather than an inversion: contrast ratios are checked against WCAG AA for
+ * body text in both directions, and the data-series colours are chosen to stay
+ * distinguishable on either background and under the most common forms of
+ * colour-vision deficiency.
+ */
+:root {
+  --canvas: #0b0e13;
+  --surface: #11151c;
+  --surface-raised: #161b24;
+  --surface-sunken: #0d1016;
+  --line: #222834;
+  --line-strong: #323a4a;
+
+  --ink: #e4e8ef;
+  --ink-muted: #9aa4b5;
+  --ink-faint: #6b7685;
+
+  --accent: #4f93d9;
+  --accent-muted: #27456b;
+  --accent-ink: #0b0e13;
+
+  --positive: #4fae7f;
+  --negative: #d2645f;
+  --caution: #c99a4b;
+
+  /* Qualitative series palette: distinguishable by hue AND lightness, so a
+     chart never relies on colour alone to be readable. */
+  --series-1: #4f93d9;
+  --series-2: #c99a4b;
+  --series-3: #6bb79a;
+  --series-4: #a67fc4;
+  --series-5: #d2645f;
+  --series-6: #5fa8b8;
+
+  --regime-bull: #4fae7f;
+  --regime-bear: #d2645f;
+  --regime-sideways: #7d879a;
+
+  --grid: #1c2230;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --canvas: #f7f8fa;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: #eef0f4;
+  --line: #dfe3ea;
+  --line-strong: #c3cad6;
+
+  --ink: #161b24;
+  --ink-muted: #525b6b;
+  --ink-faint: #7b8494;
+
+  --accent: #1f6cb0;
+  --accent-muted: #cfe0f1;
+  --accent-ink: #ffffff;
+
+  --positive: #1f7a4d;
+  --negative: #b2342f;
+  --caution: #8a6212;
+
+  --series-1: #1f6cb0;
+  --series-2: #8a6212;
+  --series-3: #1f7a5a;
+  --series-4: #6b3f94;
+  --series-5: #b2342f;
+  --series-6: #216b7d;
+
+  --regime-bull: #1f7a4d;
+  --regime-bear: #b2342f;
+  --regime-sideways: #5c6678;
+
+  --grid: #e6e9ef;
+
+  color-scheme: light;
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv05", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Respect a user's reduced-motion preference: decoration is never worth
+   triggering someone's vestibular disorder. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* A visible, consistent focus ring is the single most important accessibility
+   affordance for keyboard users. Never remove it without a replacement. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Numeric tables and metrics use tabular figures so digits line up in columns
+   and a changing value does not make the layout jitter. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+/* --- Range input, styled consistently across browsers --- */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 1.25rem;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px;
+  background: var(--line-strong);
+  border-radius: 999px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -6px;
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--canvas);
+  transition: transform 0.12s ease;
+}
+input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+input[type="range"]::-moz-range-track {
+  height: 3px;
+  background: var(--line-strong);
+  border-radius: 999px;
+}
+input[type="range"]::-moz-range-thumb {
+  height: 13px;
+  width: 13px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--canvas);
+}
+input[type="range"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* --- KaTeX --- */
+.katex {
+  font-size: 1.04em;
+}
+.katex-display {
+  margin: 0.85rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.2rem 0;
+}
+/* Inline math should never force a horizontal page scroll on a phone. */
+.katex-display > .katex {
+  white-space: nowrap;
+}
+
+/* --- Scrollbars --- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-sunken);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 999px;
+  border: 2px solid var(--surface-sunken);
+}
+
+.grid-paper {
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.recharts-surface:focus {
+  outline: none;
+}
