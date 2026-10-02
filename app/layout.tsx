@@ -6,7 +6,13 @@ import { ResearchModeProvider } from "@/components/providers/ResearchModeProvide
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://quantlab.example";
+
 export const metadata: Metadata = {
+  // metadataBase lets Next resolve relative Open Graph and canonical URLs. Without
+  // it, social previews silently fall back to relative paths that crawlers cannot
+  // follow.
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "QuantLab — Experiment with the mathematics behind markets",
     template: "%s — QuantLab",
@@ -23,8 +29,22 @@ export const metadata: Metadata = {
     description:
       "An interactive laboratory for probability, statistics, portfolio theory, market simulation, risk and quantitative research.",
     type: "website",
+    siteName: "QuantLab",
+    locale: "en_GB",
   },
-  robots: { index: true, follow: true },
+  twitter: {
+    card: "summary_large_image",
+    title: "QuantLab — Experiment with the mathematics behind markets",
+    description:
+      "Ten interactive labs for probability, portfolio theory, risk and quantitative research. Educational and research-oriented; not investment advice.",
+  },
+  alternates: { canonical: "/" },
+  category: "education",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-snippet": -1, "max-image-preview": "large" },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

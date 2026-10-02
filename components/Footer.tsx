@@ -16,6 +16,7 @@ const COLUMNS = [
     heading: "Learn",
     links: [
       { href: "/learn", label: "Lesson index" },
+      { href: "/learn/notes", label: "Code walkthroughs" },
       { href: "/learn/expected-value", label: "Expected value" },
       { href: "/learn/monte-carlo-simulation", label: "Monte Carlo" },
       { href: "/glossary", label: "Glossary" },

@@ -80,6 +80,9 @@ failed or needed revision. Failed experiments stay visible.
 
 - **28 lessons** across **10 modules** in dependency order, each with a definition, intuition,
   formula, worked example, and a link to the lab that demonstrates it.
+- **10 code walkthroughs** — one per module — covering what the code does, why the mathematics
+  works, every variable, the failure modes that return a plausible wrong answer rather than an
+  error, three questions you should be able to answer aloud with model answers, and a quiz.
 - **A pre-registered research framework** for studying RL robustness under distribution shift, with
   the results sections deliberately empty.
 - **An experiment log** including failures, a **research journal**, **10 original challenges** with
@@ -101,6 +104,7 @@ quantlab/
 ├── app/                        # Next.js App Router
 │   ├── labs/<slug>/            # One directory per lab: page.tsx (server) + Lab.tsx (client)
 │   ├── learn/[slug]/           # Lesson pages, statically generated
+│   ├── learn/notes/[module]/   # Per-module code walkthroughs
 │   ├── research/               # RL framework, experiment log, journal
 │   └── …                       # about, projects, challenges, glossary, references
 ├── components/
@@ -109,7 +113,7 @@ quantlab/
 │   ├── math/                   # KaTeX rendering with symbol legends
 │   ├── providers/              # Theme and Research Mode context
 │   └── ui/                     # Cards, controls, tables, states
-├── content/                    # Lab registry, lessons, glossary, challenges, journal, experiments
+├── content/                    # Lab registry, lessons, teaching notes, glossary, challenges, journal
 ├── lib/
 │   ├── charts/                 # Largest-Triangle-Three-Buckets downsampling
 │   ├── experiment/             # Config serialisation, URL encoding, CSV/JSON export
@@ -214,6 +218,23 @@ npm test
 
 ---
 
+## Accessibility
+
+Audited rather than assumed. Every interactive control has a programmatic label, every chart carries a
+written text alternative via `role="img"` and `aria-label`, tab lists implement arrow-key navigation
+per the WAI-ARIA pattern, and no information is conveyed by colour alone — correlation heatmaps print
+the value in every cell, and chart legends pair colour with a line style.
+
+Palette contrast was computed rather than eyeballed. The audit found `--ink-faint` failing WCAG AA for
+normal text in both themes (3.30–4.19 against a 4.5 requirement) while being used for 11px footnotes;
+both values were corrected, and the whole palette now clears 4.5:1 on every surface it is used against.
+
+A second finding: the `Toggle` component used `<label for>` pointing at a `<button>`. That is
+technically permitted, but accessible-name computation for it is inconsistent across screen readers,
+and an unnamed switch is announced as just "switch". It now uses `aria-labelledby`.
+
+---
+
 ## Research methodology
 
 The research section is structured so that experimental design is published *before* results exist.
@@ -262,8 +283,9 @@ understated rather than overstated.
 
 ## Roadmap
 
-**Done** — design system, navigation, all ten labs, 28 lessons, glossary, challenges, research
-framework, experiment log, journal, Research Mode, reproducibility layer, 272 tests.
+**Done** — design system, navigation, all ten labs, 28 lessons, 10 code walkthroughs, glossary,
+challenges, research framework, experiment log, journal, Research Mode, reproducibility layer,
+sitemap and robots, WCAG AA contrast throughout, 272 tests.
 
 **Next** — ARIMA and GARCH volatility modelling; hidden Markov models fitted by Baum-Welch (to
 quantify how much of the Oracle gap is state estimation versus policy learning); PCA and factor

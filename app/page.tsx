@@ -158,9 +158,14 @@ export default function HomePage() {
                 learning. Each lesson has a definition, the intuition, the formula, a worked example, an
                 interactive demonstration, and an honest note on why it matters.
               </p>
-              <Link href="/learn" className="mt-4 text-xs font-medium text-accent hover:underline">
-                Start with Module 1 →
-              </Link>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1">
+                <Link href="/learn" className="text-xs font-medium text-accent hover:underline">
+                  Start with Module 1 →
+                </Link>
+                <Link href="/learn/notes" className="text-xs font-medium text-accent hover:underline">
+                  Code walkthroughs →
+                </Link>
+              </div>
             </CardBody>
           </Card>
 

@@ -307,17 +307,30 @@ export function Toggle({
   hint?: string;
 }) {
   const id = useId();
+  const labelId = `${id}-label`;
   return (
     <div className="flex items-center justify-between gap-3">
-      <label htmlFor={id} className="flex items-center gap-1.5 text-xs font-medium text-ink-muted">
+      {/*
+        A <label for> pointing at a <button> is technically permitted — button is a
+        labelable element — but accessible-name computation for it is inconsistent
+        across screen readers, and an unnamed switch is announced as just "switch".
+        aria-labelledby is unambiguous, so we use that and make the label itself
+        clickable with an explicit handler rather than relying on the for/id pair.
+      */}
+      <span
+        id={labelId}
+        onClick={() => onChange(!checked)}
+        className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-ink-muted"
+      >
         <span>{label}</span>
         {hint ? <InfoTip label={`About ${label}`}>{hint}</InfoTip> : null}
-      </label>
+      </span>
       <button
         id={id}
         type="button"
         role="switch"
         aria-checked={checked}
+        aria-labelledby={labelId}
         onClick={() => onChange(!checked)}
         className={`relative h-5 w-9 shrink-0 rounded-full border transition-colors ${
           checked ? "border-accent bg-accent" : "border-line-strong bg-surface-sunken"

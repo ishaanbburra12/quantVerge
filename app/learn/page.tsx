@@ -69,6 +69,25 @@ export default function LearnPage() {
         </div>
 
         <Card className="mt-6">
+          <CardBody className="flex flex-wrap items-center justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="text-sm font-semibold text-ink">Code walkthroughs</h2>
+              <p className="mt-1.5 max-w-prose text-xs leading-relaxed text-ink-muted">
+                The lessons above explain the mathematics. The walkthroughs explain the code that implements
+                it — what every variable means, which failure modes return a plausible wrong answer rather than
+                an error, three questions you should be able to answer aloud, and a quiz per module.
+              </p>
+            </div>
+            <Link
+              href="/learn/notes"
+              className="shrink-0 rounded-md border border-accent bg-accent px-3.5 py-2 text-sm font-medium text-accent-ink transition-all hover:brightness-110"
+            >
+              Open walkthroughs
+            </Link>
+          </CardBody>
+        </Card>
+
+        <Card className="mt-4">
           <CardBody>
             <h2 className="text-sm font-semibold text-ink">A note on the order</h2>
             <p className="mt-2 max-w-prose text-xs leading-relaxed text-ink-muted">
