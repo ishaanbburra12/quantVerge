@@ -29,7 +29,7 @@ export interface LabMeta {
   difficulty: Difficulty;
   concepts: string[];
   minutes: number;
-  category: "Probability & simulation" | "Portfolio & risk" | "Strategy research" | "Derivatives";
+  category: "Probability & simulation" | "Portfolio & risk" | "Strategy research" | "Derivatives" | "Rates & credit";
   status: "available" | "planned";
 }
 
@@ -143,6 +143,30 @@ export const LABS: LabMeta[] = [
     status: "available",
   },
   {
+    slug: "fixed-income",
+    title: "Fixed Income Lab",
+    tagline: "Why a bond with completely certain cash flows is still risky.",
+    description:
+      "Bond pricing, duration, convexity and yield curves. There is no randomness here at all — the cash flows are contractual — so the entire risk is that the discount rate moves, which makes this an exercise in calculus rather than probability.",
+    difficulty: 2,
+    concepts: ["Discounting", "Macaulay & modified duration", "Convexity", "DV01", "Yield curves", "Forward rates"],
+    minutes: 20,
+    category: "Rates & credit",
+    status: "available",
+  },
+  {
+    slug: "inference",
+    title: "Statistical Inference Lab",
+    tagline: "What a significant result establishes, and what it does not.",
+    description:
+      "Hypothesis testing, p-values, statistical power, Type I and Type II errors, and multiple testing — run on data where you set the true effect yourself, which is the only setting where false positives can actually be counted.",
+    difficulty: 2,
+    concepts: ["Hypothesis testing", "p-values", "Statistical power", "Type I & II errors", "Multiple testing", "Confidence intervals"],
+    minutes: 22,
+    category: "Probability & simulation",
+    status: "available",
+  },
+  {
     slug: "random-walk",
     title: "Random Walk vs Market Structure",
     tagline: "Four data-generating processes that look alike and behave differently.",
@@ -159,6 +183,7 @@ export const LABS: LabMeta[] = [
 export const LAB_CATEGORIES = [
   "Probability & simulation",
   "Portfolio & risk",
+  "Rates & credit",
   "Derivatives",
   "Strategy research",
 ] as const;

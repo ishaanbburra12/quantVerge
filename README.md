@@ -61,7 +61,7 @@ failed or needed revision. Failed experiments stay visible.
 
 ## Features
 
-### Ten laboratories
+### Twelve laboratories
 
 | Lab | Level | What it demonstrates |
 | --- | --- | --- |
@@ -75,6 +75,8 @@ failed or needed revision. Failed experiments stay visible.
 | **Correlation Lab** | 1 | The covariance cross term, the perfect hedge at ρ = −1 |
 | **Probability Playground** | 1 | Law of large numbers, central limit theorem, Bayes with natural frequencies |
 | **Random Walk vs Structure** | 2 | Four processes, autocorrelation of returns vs squared returns |
+| **Fixed Income** | 2 | Bond pricing, duration, convexity, DV01, yield curves, forward rates |
+| **Statistical Inference** | 2 | Hypothesis testing, p-values, power, Type I/II errors, multiple testing |
 
 ### Learn, research and reference
 
@@ -123,7 +125,7 @@ quantlab/
 │   ├── math/                   # RNG, distributions, linear algebra
 │   ├── simulation/             # GBM, AR(1), OU, jump diffusion, regime switching
 │   └── statistics/             # Descriptive statistics
-└── tests/                      # 272 numerical tests
+└── tests/                      # 349 numerical tests
 ```
 
 ### Two architectural decisions worth explaining
@@ -153,6 +155,8 @@ the obsolete run instead of finishing it.
 | **Risk** | Historical, parametric and Monte Carlo VaR; conditional VaR; parametric CVaR in closed form |
 | **Derivatives** | Black-Scholes-Merton with dividends, all five Greeks, implied volatility by bisection, Monte Carlo pricing with antithetic variates |
 | **Portfolio** | Quadratic forms, Cholesky decomposition, Gaussian elimination with partial pivoting, closed-form minimum-variance and tangency portfolios, exact efficient frontier via Lagrangian, Euler risk decomposition |
+| **Fixed income** | Discounted cash flow pricing, yield to maturity by bisection, Macaulay and modified duration, convexity, DV01, Nelson-Siegel yield curves, no-arbitrage forward rates |
+| **Inference** | Regularised incomplete beta by continued fraction, Student-t CDF and inverse, one-sample t-test, statistical power, Bonferroni and Benjamini-Hochberg corrections |
 
 ### Three implementation details that are easy to get wrong
 
@@ -195,7 +199,7 @@ npm run test:watch   # Tests in watch mode
 
 ## Testing
 
-272 tests across 8 files, all numerical. The suite checks three kinds of thing:
+349 tests across 10 files, all numerical. The suite checks three kinds of thing:
 
 **Known analytic values.** Black-Scholes reproduces the canonical textbook case (call `10.450584`,
 put `5.573526`) to six decimal places. The normal CDF matches published standard-normal values to ten
@@ -283,14 +287,15 @@ understated rather than overstated.
 
 ## Roadmap
 
-**Done** — design system, navigation, all ten labs, 28 lessons, 10 code walkthroughs, glossary,
+**Done** — design system, navigation, all twelve labs, 28 lessons, 10 code walkthroughs, glossary,
 challenges, research framework, experiment log, journal, Research Mode, reproducibility layer,
 sitemap and robots, WCAG AA contrast throughout, 272 tests.
 
-**Next** — ARIMA and GARCH volatility modelling; hidden Markov models fitted by Baum-Welch (to
-quantify how much of the Oracle gap is state estimation versus policy learning); PCA and factor
-models; CAPM and Fama-French; the RL agent implementation and training loop; CSV upload for
-user-supplied data.
+**Known gaps, in priority order** — PCA and eigendecomposition; CAPM and Fama-French factor
+models; GARCH volatility modelling; binomial trees and American exercise; maximum likelihood
+estimation; credit risk and default modelling; market microstructure and order books; the RL agent
+implementation. These are listed because the honest answer to "does this cover everything a quant
+needs" is no, and a roadmap is more useful than a claim.
 
 **Later** — pairs trading and cointegration; Kalman filters; neural network function approximation;
 market microstructure and order-book simulation; stochastic calculus notes.

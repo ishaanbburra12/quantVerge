@@ -137,10 +137,10 @@ export const CHALLENGES: Challenge[] = [
       "Require S / SE > 1.96, so 0.5 / √(1.125/n) > 1.96",
       "0.5√n / √1.125 > 1.96",
       "√n > 1.96 × 1.0607 / 0.5 = 4.158",
-      "n > 17.3",
+      "n > 17.3, so 18 whole years",
     ],
     answer:
-      "About 17 years. A genuinely good strategy needs nearly two decades of live performance before its edge is statistically distinguishable from luck. This is why track records are so hard to interpret, and why conviction in any strategy is almost always based on reasoning rather than on evidence.",
+      "Just over 17.3 years, so 18 full years. A genuinely good strategy needs nearly two decades of live performance before its edge is statistically distinguishable from luck. This is why track records are so hard to interpret, and why conviction in any strategy is almost always based on reasoning rather than on evidence.",
     simulation:
       "Run the Backtesting Lab at increasing horizons on a market with known structure and watch how much the measured Sharpe moves with the seed alone.",
   },
