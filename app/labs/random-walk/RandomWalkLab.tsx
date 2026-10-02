@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useDebounced } from "@/lib/hooks/useBatchedSimulation";
 import {
   Button, Callout, Card, CardBody, CardHeader, MetricCard, MetricGrid,
   SliderControl, NumberField, SelectField, Toggle, DataTable, Tabs,
@@ -30,7 +31,16 @@ const REGIME_NAMES = ["Bull", "Bear", "Sideways"];
 type ViewTab = "price" | "returns" | "rolling" | "acf";
 
 export function RandomWalkLab({ lab, initialParams }: { lab: LabMeta; initialParams: RandomWalkParams }) {
-  const [params, setParams] = useState<RandomWalkParams>(initialParams);
+  const [liveParams, setParams] = useState<RandomWalkParams>(initialParams);
+  /**
+   * `liveParams` updates on every mousemove so the slider thumb tracks the
+   * finger. Everything downstream — the simulation AND the chart props — reads
+   * the debounced copy instead, so dragging triggers one recompute and one chart
+   * render rather than one per pixel. The chart captions are also more honest
+   * this way: they describe the parameters that were actually simulated, not a
+   * value the slider is still travelling through.
+   */
+  const params = useDebounced(liveParams, 160);
   const [showHiddenState, setShowHiddenState] = useState(false);
   const [view, setView] = useState<ViewTab>("price");
 
@@ -135,7 +145,7 @@ export function RandomWalkLab({ lab, initialParams }: { lab: LabMeta; initialPar
             <CardBody className="space-y-4">
               <SelectField
                 label="Data-generating process"
-                value={params.mode}
+                value={liveParams.mode}
                 options={(Object.keys(MODE_LABELS) as WalkMode[]).map((m) => ({ value: m, label: MODE_LABELS[m] }))}
                 onChange={(v) => update("mode", v)}
               />
@@ -147,7 +157,7 @@ export function RandomWalkLab({ lab, initialParams }: { lab: LabMeta; initialPar
                 <SliderControl
                   label="Memory strength"
                   symbol={<InlineMath>{"|\\varphi|"}</InlineMath>}
-                  value={params.phi}
+                  value={liveParams.phi}
                   min={0} max={0.6} step={0.01}
                   onChange={(v) => update("phi", v)}
                   format={(v) => v.toFixed(2)}
@@ -157,42 +167,42 @@ export function RandomWalkLab({ lab, initialParams }: { lab: LabMeta; initialPar
 
               <SliderControl
                 label="Annual drift"
-                value={params.drift}
+                value={liveParams.drift}
                 min={-0.2} max={0.25} step={0.005}
                 onChange={(v) => update("drift", v)}
                 format={(v) => percent(v, 1)}
               />
               <SliderControl
                 label="Annual volatility"
-                value={params.volatility}
+                value={liveParams.volatility}
                 min={0.05} max={0.6} step={0.01}
                 onChange={(v) => update("volatility", v)}
                 format={(v) => percent(v, 0)}
               />
               <SliderControl
                 label="Trading days"
-                value={params.steps}
+                value={liveParams.steps}
                 min={252} max={5040} step={252}
                 onChange={(v) => update("steps", v)}
                 format={(v) => `${integer(v)} (${(v / 252).toFixed(0)}y)`}
               />
               <SliderControl
                 label="Rolling window"
-                value={params.rollingWindow}
+                value={liveParams.rollingWindow}
                 min={10} max={120} step={5}
                 onChange={(v) => update("rollingWindow", v)}
                 format={(v) => `${v} days`}
               />
               <SliderControl
                 label="Maximum lag"
-                value={params.maxLag}
+                value={liveParams.maxLag}
                 min={5} max={50} step={1}
                 onChange={(v) => update("maxLag", v)}
                 format={(v) => String(v)}
               />
               <NumberField
                 label="Random seed"
-                value={params.seed}
+                value={liveParams.seed}
                 onChange={(v) => update("seed", Math.max(0, Math.floor(v)))}
                 min={0} step={1}
               />

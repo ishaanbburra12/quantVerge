@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useDebounced } from "@/lib/hooks/useBatchedSimulation";
 import {
   Button, Callout, Card, CardBody, CardHeader, MetricCard, MetricGrid,
   SliderControl, NumberField, DataTable,
@@ -22,7 +23,16 @@ import {
 } from "@/lib/labs/correlation";
 
 export function CorrelationLab({ lab, initialParams }: { lab: LabMeta; initialParams: CorrelationParams }) {
-  const [params, setParams] = useState<CorrelationParams>(initialParams);
+  const [liveParams, setParams] = useState<CorrelationParams>(initialParams);
+  /**
+   * `liveParams` updates on every mousemove so the slider thumb tracks the
+   * finger. Everything downstream — the simulation AND the chart props — reads
+   * the debounced copy instead, so dragging triggers one recompute and one chart
+   * render rather than one per pixel. The chart captions are also more honest
+   * this way: they describe the parameters that were actually simulated, not a
+   * value the slider is still travelling through.
+   */
+  const params = useDebounced(liveParams, 160);
 
   const update = <K extends keyof CorrelationParams>(key: K, value: CorrelationParams[K]) =>
     setParams((previous) => ({ ...previous, [key]: value }));
@@ -119,12 +129,12 @@ export function CorrelationLab({ lab, initialParams }: { lab: LabMeta; initialPa
               <div className="space-y-2.5 border-l-2 pl-3" style={{ borderColor: "var(--series-1)" }}>
                 <p className="text-xs font-semibold" style={{ color: "var(--series-1)" }}>Asset A</p>
                 <SliderControl
-                  label="Expected return" value={params.returnA}
+                  label="Expected return" value={liveParams.returnA}
                   min={-0.1} max={0.3} step={0.005}
                   onChange={(v) => update("returnA", v)} format={(v) => percent(v, 1)}
                 />
                 <SliderControl
-                  label="Volatility" value={params.volA}
+                  label="Volatility" value={liveParams.volA}
                   min={0.02} max={0.6} step={0.01}
                   onChange={(v) => update("volA", v)} format={(v) => percent(v, 0)}
                 />
@@ -132,12 +142,12 @@ export function CorrelationLab({ lab, initialParams }: { lab: LabMeta; initialPa
               <div className="space-y-2.5 border-l-2 pl-3" style={{ borderColor: "var(--series-2)" }}>
                 <p className="text-xs font-semibold" style={{ color: "var(--series-2)" }}>Asset B</p>
                 <SliderControl
-                  label="Expected return" value={params.returnB}
+                  label="Expected return" value={liveParams.returnB}
                   min={-0.1} max={0.3} step={0.005}
                   onChange={(v) => update("returnB", v)} format={(v) => percent(v, 1)}
                 />
                 <SliderControl
-                  label="Volatility" value={params.volB}
+                  label="Volatility" value={liveParams.volB}
                   min={0.02} max={0.6} step={0.01}
                   onChange={(v) => update("volB", v)} format={(v) => percent(v, 0)}
                 />
@@ -147,7 +157,7 @@ export function CorrelationLab({ lab, initialParams }: { lab: LabMeta; initialPa
                 <SliderControl
                   label="Correlation"
                   symbol={<InlineMath>{"\\rho"}</InlineMath>}
-                  value={params.rho}
+                  value={liveParams.rho}
                   min={-1} max={1} step={0.01}
                   onChange={(v) => update("rho", v)}
                   format={(v) => v.toFixed(2)}
@@ -164,7 +174,7 @@ export function CorrelationLab({ lab, initialParams }: { lab: LabMeta; initialPa
 
               <SliderControl
                 label="Weight in A"
-                value={params.weightA}
+                value={liveParams.weightA}
                 min={0} max={1} step={0.01}
                 onChange={(v) => update("weightA", v)}
                 format={(v) => `${percent(v, 0)} / ${percent(1 - v, 0)}`}
@@ -174,7 +184,7 @@ export function CorrelationLab({ lab, initialParams }: { lab: LabMeta; initialPa
               </Button>
               <NumberField
                 label="Random seed"
-                value={params.seed}
+                value={liveParams.seed}
                 onChange={(v) => update("seed", Math.max(0, Math.floor(v)))}
                 min={0} step={1}
               />

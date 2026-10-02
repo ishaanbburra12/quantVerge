@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useDebounced } from "@/lib/hooks/useBatchedSimulation";
 import {
   Button, Callout, Card, CardBody, CardHeader, MetricCard, MetricGrid,
   SliderControl, NumberField, Toggle, DataTable, Badge, Tabs,
@@ -27,7 +28,16 @@ const REGIME_COLORS = ["var(--regime-bull)", "var(--regime-bear)", "var(--regime
 type ViewTab = "price" | "returns" | "volatility" | "drawdown";
 
 export function RegimeLab({ lab, initialParams }: { lab: LabMeta; initialParams: RegimeParams }) {
-  const [params, setParams] = useState<RegimeParams>(initialParams);
+  const [liveParams, setParams] = useState<RegimeParams>(initialParams);
+  /**
+   * `liveParams` updates on every mousemove so the slider thumb tracks the
+   * finger. Everything downstream — the simulation AND the chart props — reads
+   * the debounced copy instead, so dragging triggers one recompute and one chart
+   * render rather than one per pixel. The chart captions are also more honest
+   * this way: they describe the parameters that were actually simulated, not a
+   * value the slider is still travelling through.
+   */
+  const params = useDebounced(liveParams, 160);
   const [hideRegimes, setHideRegimes] = useState(false);
   const [view, setView] = useState<ViewTab>("price");
 
@@ -222,7 +232,7 @@ export function RegimeLab({ lab, initialParams }: { lab: LabMeta; initialParams:
               <CardBody className="space-y-4">
                 <SliderControl
                   label="Trading days"
-                  value={params.steps}
+                  value={liveParams.steps}
                   min={252}
                   max={5040}
                   step={252}
@@ -231,7 +241,7 @@ export function RegimeLab({ lab, initialParams }: { lab: LabMeta; initialParams:
                 />
                 <SliderControl
                   label="Detection window"
-                  value={params.detectionWindow}
+                  value={liveParams.detectionWindow}
                   min={10}
                   max={120}
                   step={5}
@@ -241,7 +251,7 @@ export function RegimeLab({ lab, initialParams }: { lab: LabMeta; initialParams:
                 />
                 <NumberField
                   label="Random seed"
-                  value={params.seed}
+                  value={liveParams.seed}
                   onChange={(v) => update("seed", Math.max(0, Math.floor(v)))}
                   min={0}
                   step={1}

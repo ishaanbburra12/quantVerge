@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { memo, useId, useState, type ReactNode } from "react";
 
 /* ------------------------------------------------------------------ */
 /* Card                                                                */
@@ -61,7 +61,7 @@ const toneClass: Record<MetricTone, string> = {
   caution: "text-caution",
 };
 
-export function MetricCard({
+function MetricCardImpl({
   label,
   value,
   hint,
@@ -385,7 +385,7 @@ export function Button({
   );
 }
 
-export function Badge({
+function BadgeImpl({
   children,
   tone = "neutral",
 }: {
@@ -590,3 +590,15 @@ export function Callout({
     </div>
   );
 }
+
+/**
+ * MetricCard and Badge take only primitive props, so memoising them actually
+ * holds — unlike the control components, whose inline onChange arrows create a
+ * new identity every render and defeat a shallow comparison.
+ *
+ * It matters because a lab renders dozens of metric cards, and dragging a slider
+ * re-renders the lab on every mousemove. These are the cheapest components to
+ * stop re-rendering and there are a lot of them.
+ */
+export const MetricCard = memo(MetricCardImpl);
+export const Badge = memo(BadgeImpl);

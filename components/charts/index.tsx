@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Line, LineChart,
+  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Customized, Line, LineChart,
   ReferenceArea, ReferenceDot, ReferenceLine, ResponsiveContainer, Scatter, ScatterChart,
   Tooltip, XAxis, YAxis, Legend,
 } from "recharts";
-import { useMemo, type ReactNode } from "react";
+import { memo, useMemo, type ReactNode } from "react";
 import { downsampleAligned, downsampleSeries } from "@/lib/charts/downsample";
 
 export const SERIES_COLORS = [
@@ -144,7 +144,7 @@ export interface LineSeries {
   width?: number;
 }
 
-export function MultiLineChart({
+function MultiLineChartImpl({
   series,
   xLabel,
   yLabel,
@@ -245,7 +245,67 @@ export function MultiLineChart({
 /* Path bundle: many simulated paths plus percentile bands             */
 /* ------------------------------------------------------------------ */
 
-export function PathBundleChart({
+interface AxisScale {
+  scale: (value: number) => number;
+}
+
+/**
+ * Draws every simulated path into a single SVG <path> element.
+ *
+ * Recharts exposes its internal axis scales to `Customized` children, which is
+ * what lets us map data coordinates to pixels without duplicating the chart's
+ * layout logic. If the scales are not available for any reason we render
+ * nothing rather than guessing — a missing bundle is obvious and recoverable,
+ * whereas a wrongly-scaled one silently misrepresents the data.
+ */
+function PathBundleLayer({
+  chartProps,
+  paths,
+  data,
+}: {
+  chartProps: Record<string, unknown>;
+  paths: number[][];
+  data: Record<string, number | null>[];
+}) {
+  const xAxisMap = chartProps.xAxisMap as Record<string, AxisScale> | undefined;
+  const yAxisMap = chartProps.yAxisMap as Record<string, AxisScale> | undefined;
+  if (!xAxisMap || !yAxisMap) return null;
+
+  const xAxis = Object.values(xAxisMap)[0];
+  const yAxis = Object.values(yAxisMap)[0];
+  if (!xAxis?.scale || !yAxis?.scale) return null;
+
+  let d = "";
+  for (let p = 0; p < paths.length; p++) {
+    let started = false;
+    for (const row of data) {
+      const value = row[`p${p}`];
+      if (value === null || value === undefined) continue;
+      const x = xAxis.scale(row.index as number);
+      const y = yAxis.scale(value);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
+      d += `${started ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
+      started = true;
+    }
+  }
+  if (d === "") return null;
+
+  return (
+    <path
+      d={d}
+      fill="none"
+      stroke="var(--series-1)"
+      // Opacity falls as the bundle grows, so the density of overlapping lines
+      // reads as a probability distribution rather than a solid block.
+      strokeOpacity={Math.max(0.1, Math.min(0.7, 14 / Math.max(1, paths.length)))}
+      strokeWidth={paths.length > 40 ? 0.7 : 1.1}
+      strokeLinejoin="round"
+      pointerEvents="none"
+    />
+  );
+}
+
+function PathBundleChartImpl({
   paths,
   percentiles,
   title,
@@ -354,21 +414,21 @@ export function PathBundleChart({
             />
           </>
         ) : null}
-        {paths.map((_, i) => (
-          <Line
-            key={i}
-            type="monotone"
-            dataKey={`p${i}`}
-            stroke="var(--series-1)"
-            // Opacity falls as the bundle grows so the density of lines itself
-            // reads as a probability distribution rather than a solid block.
-            strokeOpacity={Math.max(0.1, Math.min(0.7, 14 / Math.max(1, paths.length)))}
-            strokeWidth={paths.length > 40 ? 0.7 : 1.1}
-            dot={false}
-            isAnimationActive={false}
-            legendType="none"
-          />
-        ))}
+        {/*
+          The path bundle is drawn as ONE <path> element containing every path as
+          a separate subpath, rather than as one Recharts <Line> per path.
+
+          Rendering 120 <Line> components meant 120 React components to
+          reconcile and 120 SVG nodes to lay out on every single update — which
+          dominated the frame budget while adding nothing a single element cannot
+          express. A compound `d` string draws the identical picture at a
+          fraction of the cost.
+        */}
+        <Customized
+          component={(chartProps: Record<string, unknown>) => (
+            <PathBundleLayer chartProps={chartProps} paths={paths} data={data} />
+          )}
+        />
         {percentiles ? (
           <Line
             type="monotone" dataKey="median" stroke="var(--ink)" strokeWidth={1.8} dot={false}
@@ -387,7 +447,7 @@ export function PathBundleChart({
 /* Histogram                                                           */
 /* ------------------------------------------------------------------ */
 
-export function HistogramChart({
+function HistogramChartImpl({
   bins,
   title,
   description,
@@ -501,7 +561,7 @@ function interpolate(curve: { x: number; y: number }[], x: number): number | und
 /* Scatter                                                             */
 /* ------------------------------------------------------------------ */
 
-export function ScatterPlot({
+function ScatterPlotImpl({
   points,
   highlights = [],
   frontier,
@@ -610,7 +670,7 @@ export function ScatterPlot({
 /* Drawdown / area chart                                               */
 /* ------------------------------------------------------------------ */
 
-export function DrawdownChart({
+function DrawdownChartImpl({
   series,
   title,
   description,
@@ -657,7 +717,7 @@ export function DrawdownChart({
 /* Equity curve with drawdown shading                                  */
 /* ------------------------------------------------------------------ */
 
-export function EquityChart({
+function EquityChartImpl({
   series,
   title,
   description,
@@ -753,7 +813,7 @@ export function EquityChart({
 /* Bar chart                                                           */
 /* ------------------------------------------------------------------ */
 
-export function SimpleBarChart({
+function SimpleBarChartImpl({
   data,
   title,
   description,
@@ -809,3 +869,26 @@ export function SimpleBarChart({
 }
 
 export { Legend };
+
+/* ------------------------------------------------------------------ */
+/* Memoised exports                                                    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Charts are memoised because dragging a slider updates component state on every
+ * mousemove, re-rendering the whole lab — while the simulation behind the charts
+ * is debounced and has NOT changed. Without memoisation, every chart re-rendered
+ * dozens of times per drag for no visual difference, which was the dominant cost
+ * of interacting with a lab.
+ *
+ * This only helps if callers pass referentially stable props, so the labs wrap
+ * their `series` arrays in useMemo. An inline array literal creates a new
+ * identity each render and defeats the memo entirely.
+ */
+export const MultiLineChart = memo(MultiLineChartImpl);
+export const PathBundleChart = memo(PathBundleChartImpl);
+export const HistogramChart = memo(HistogramChartImpl);
+export const ScatterPlot = memo(ScatterPlotImpl);
+export const DrawdownChart = memo(DrawdownChartImpl);
+export const EquityChart = memo(EquityChartImpl);
+export const SimpleBarChart = memo(SimpleBarChartImpl);

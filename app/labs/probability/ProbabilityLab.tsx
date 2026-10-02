@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useDebounced } from "@/lib/hooks/useBatchedSimulation";
 import {
   Button, Callout, Card, CardBody, CardHeader, MetricCard, MetricGrid,
   SliderControl, NumberField, SelectField, DataTable, Tabs,
@@ -21,7 +22,16 @@ import {
 } from "@/lib/labs/probability";
 
 export function ProbabilityLab({ lab, initialParams }: { lab: LabMeta; initialParams: ProbabilityParams }) {
-  const [params, setParams] = useState<ProbabilityParams>(initialParams);
+  const [liveParams, setParams] = useState<ProbabilityParams>(initialParams);
+  /**
+   * `liveParams` updates on every mousemove so the slider thumb tracks the
+   * finger. Everything downstream — the simulation AND the chart props — reads
+   * the debounced copy instead, so dragging triggers one recompute and one chart
+   * render rather than one per pixel. The chart captions are also more honest
+   * this way: they describe the parameters that were actually simulated, not a
+   * value the slider is still travelling through.
+   */
+  const params = useDebounced(liveParams, 160);
 
   const update = <K extends keyof ProbabilityParams>(key: K, value: ProbabilityParams[K]) =>
     setParams((previous) => ({ ...previous, [key]: value }));
@@ -191,7 +201,7 @@ export function ProbabilityLab({ lab, initialParams }: { lab: LabMeta; initialPa
               {params.experiment === "coin" || params.experiment === "lln" ? (
                 <SliderControl
                   label="P(heads)"
-                  value={params.probability}
+                  value={liveParams.probability}
                   min={0} max={1} step={0.01}
                   onChange={(v) => update("probability", v)}
                   format={(v) => v.toFixed(2)}
@@ -203,7 +213,7 @@ export function ProbabilityLab({ lab, initialParams }: { lab: LabMeta; initialPa
                 <>
                   <SelectField
                     label="Source distribution"
-                    value={params.sourceDistribution}
+                    value={liveParams.sourceDistribution}
                     options={[
                       { value: "exponential", label: "Exponential — heavily right-skewed" },
                       { value: "uniform", label: "Uniform — flat" },
@@ -215,7 +225,7 @@ export function ProbabilityLab({ lab, initialParams }: { lab: LabMeta; initialPa
                   />
                   <SliderControl
                     label="Sample size n"
-                    value={params.sampleSize}
+                    value={liveParams.sampleSize}
                     min={1} max={100} step={1}
                     onChange={(v) => update("sampleSize", v)}
                     format={(v) => String(v)}
@@ -228,7 +238,7 @@ export function ProbabilityLab({ lab, initialParams }: { lab: LabMeta; initialPa
                 <>
                   <SliderControl
                     label="Prior probability"
-                    value={params.prior}
+                    value={liveParams.prior}
                     min={0.0001} max={0.5} step={0.0005}
                     onChange={(v) => update("prior", v)}
                     format={(v) => percent(v, 3)}
@@ -236,14 +246,14 @@ export function ProbabilityLab({ lab, initialParams }: { lab: LabMeta; initialPa
                   />
                   <SliderControl
                     label="Sensitivity P(+ | disease)"
-                    value={params.sensitivity}
+                    value={liveParams.sensitivity}
                     min={0.5} max={0.9999} step={0.001}
                     onChange={(v) => update("sensitivity", v)}
                     format={(v) => percent(v, 2)}
                   />
                   <SliderControl
                     label="Specificity P(− | healthy)"
-                    value={params.specificity}
+                    value={liveParams.specificity}
                     min={0.5} max={0.9999} step={0.001}
                     onChange={(v) => update("specificity", v)}
                     format={(v) => percent(v, 2)}
@@ -255,7 +265,7 @@ export function ProbabilityLab({ lab, initialParams }: { lab: LabMeta; initialPa
               {params.experiment !== "bayes" ? (
                 <SliderControl
                   label="Trials"
-                  value={params.trials}
+                  value={liveParams.trials}
                   min={10} max={100000} step={10}
                   onChange={(v) => update("trials", v)}
                   format={(v) => integer(v)}
@@ -264,7 +274,7 @@ export function ProbabilityLab({ lab, initialParams }: { lab: LabMeta; initialPa
 
               <NumberField
                 label="Random seed"
-                value={params.seed}
+                value={liveParams.seed}
                 onChange={(v) => update("seed", Math.max(0, Math.floor(v)))}
                 min={0} step={1}
               />

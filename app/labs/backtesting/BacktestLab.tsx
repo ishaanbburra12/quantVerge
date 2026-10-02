@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useDebounced } from "@/lib/hooks/useBatchedSimulation";
 import {
   Button, Callout, Card, CardBody, CardHeader, MetricCard, MetricGrid,
   SliderControl, NumberField, SelectField, DataTable, Badge,
@@ -41,7 +42,16 @@ const ACTIVE_STRATEGIES: StrategyKind[] = [
 ];
 
 export function BacktestLab({ lab, initialParams }: { lab: LabMeta; initialParams: BacktestParams }) {
-  const [params, setParams] = useState<BacktestParams>(initialParams);
+  const [liveParams, setParams] = useState<BacktestParams>(initialParams);
+  /**
+   * `liveParams` updates on every mousemove so the slider thumb tracks the
+   * finger. Everything downstream — the simulation AND the chart props — reads
+   * the debounced copy instead, so dragging triggers one recompute and one chart
+   * render rather than one per pixel. The chart captions are also more honest
+   * this way: they describe the parameters that were actually simulated, not a
+   * value the slider is still travelling through.
+   */
+  const params = useDebounced(liveParams, 160);
 
   const update = <K extends keyof BacktestParams>(key: K, value: BacktestParams[K]) =>
     setParams((previous) => ({ ...previous, [key]: value }));
@@ -192,7 +202,7 @@ export function BacktestLab({ lab, initialParams }: { lab: LabMeta; initialParam
               <CardBody className="space-y-4">
                 <SelectField
                   label="Process"
-                  value={params.marketProcess}
+                  value={liveParams.marketProcess}
                   options={(Object.keys(MARKET_LABELS) as BacktestParams["marketProcess"][]).map((p) => ({
                     value: p, label: MARKET_LABELS[p],
                   }))}
@@ -214,28 +224,28 @@ export function BacktestLab({ lab, initialParams }: { lab: LabMeta; initialParam
                 ) : null}
                 <SliderControl
                   label="Annual drift"
-                  value={params.drift}
+                  value={liveParams.drift}
                   min={-0.2} max={0.25} step={0.005}
                   onChange={(v) => update("drift", v)}
                   format={(v) => percent(v, 1)}
                 />
                 <SliderControl
                   label="Annual volatility"
-                  value={params.volatility}
+                  value={liveParams.volatility}
                   min={0.05} max={0.6} step={0.01}
                   onChange={(v) => update("volatility", v)}
                   format={(v) => percent(v, 0)}
                 />
                 <SliderControl
                   label="Trading days"
-                  value={params.steps}
+                  value={liveParams.steps}
                   min={252} max={7560} step={252}
                   onChange={(v) => update("steps", v)}
                   format={(v) => `${integer(v)} (${(v / 252).toFixed(0)}y)`}
                 />
                 <NumberField
                   label="Market seed"
-                  value={params.seed}
+                  value={liveParams.seed}
                   onChange={(v) => update("seed", Math.max(0, Math.floor(v)))}
                   min={0} step={1}
                 />
@@ -247,28 +257,28 @@ export function BacktestLab({ lab, initialParams }: { lab: LabMeta; initialParam
               <CardBody className="space-y-4">
                 <SliderControl
                   label="Fast moving average"
-                  value={params.fastWindow}
+                  value={liveParams.fastWindow}
                   min={2} max={100} step={1}
-                  onChange={(v) => update("fastWindow", Math.min(v, params.slowWindow - 1))}
+                  onChange={(v) => update("fastWindow", Math.min(v, liveParams.slowWindow - 1))}
                   format={(v) => `${v} days`}
                 />
                 <SliderControl
                   label="Slow moving average"
-                  value={params.slowWindow}
+                  value={liveParams.slowWindow}
                   min={5} max={300} step={5}
-                  onChange={(v) => update("slowWindow", Math.max(v, params.fastWindow + 1))}
+                  onChange={(v) => update("slowWindow", Math.max(v, liveParams.fastWindow + 1))}
                   format={(v) => `${v} days`}
                 />
                 <SliderControl
                   label="Momentum lookback"
-                  value={params.lookback}
+                  value={liveParams.lookback}
                   min={5} max={250} step={5}
                   onChange={(v) => update("lookback", v)}
                   format={(v) => `${v} days`}
                 />
                 <SliderControl
                   label="Signal threshold"
-                  value={params.threshold}
+                  value={liveParams.threshold}
                   min={0} max={0.15} step={0.005}
                   onChange={(v) => update("threshold", v)}
                   format={(v) => percent(v, 1)}
@@ -282,7 +292,7 @@ export function BacktestLab({ lab, initialParams }: { lab: LabMeta; initialParam
               <CardBody className="space-y-4">
                 <SliderControl
                   label="Transaction cost"
-                  value={params.transactionCost}
+                  value={liveParams.transactionCost}
                   min={0} max={0.005} step={0.00025}
                   onChange={(v) => update("transactionCost", v)}
                   format={(v) => `${(v * 100).toFixed(3)}%`}
@@ -290,7 +300,7 @@ export function BacktestLab({ lab, initialParams }: { lab: LabMeta; initialParam
                 />
                 <NumberField
                   label="Initial capital"
-                  value={params.initialCapital}
+                  value={liveParams.initialCapital}
                   onChange={(v) => update("initialCapital", Math.max(100, v))}
                   min={100} step={1000} suffix="$"
                 />

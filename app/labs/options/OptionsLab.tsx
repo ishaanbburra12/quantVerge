@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useDebounced } from "@/lib/hooks/useBatchedSimulation";
 import {
   Button, Callout, Card, CardBody, CardHeader, MetricCard, MetricGrid,
   SliderControl, NumberField, SelectField, Toggle, DataTable, Badge, Tabs,
@@ -20,7 +21,16 @@ import { OPTIONS_DEFAULTS, OPTIONS_LABELS, type OptionsParams } from "@/lib/labs
 type ChartTab = "spot" | "volatility" | "time" | "greeks";
 
 export function OptionsLab({ lab, initialParams }: { lab: LabMeta; initialParams: OptionsParams }) {
-  const [params, setParams] = useState<OptionsParams>(initialParams);
+  const [liveParams, setParams] = useState<OptionsParams>(initialParams);
+  /**
+   * `liveParams` updates on every mousemove so the slider thumb tracks the
+   * finger. Everything downstream — the simulation AND the chart props — reads
+   * the debounced copy instead, so dragging triggers one recompute and one chart
+   * render rather than one per pixel. The chart captions are also more honest
+   * this way: they describe the parameters that were actually simulated, not a
+   * value the slider is still travelling through.
+   */
+  const params = useDebounced(liveParams, 160);
   const [chart, setChart] = useState<ChartTab>("spot");
 
   const update = <K extends keyof OptionsParams>(key: K, value: OptionsParams[K]) =>
@@ -142,7 +152,7 @@ export function OptionsLab({ lab, initialParams }: { lab: LabMeta; initialParams
             <CardBody className="space-y-4">
               <SelectField
                 label="Option type"
-                value={params.optionType}
+                value={liveParams.optionType}
                 options={[
                   { value: "call", label: "Call — right to buy at K" },
                   { value: "put", label: "Put — right to sell at K" },
@@ -151,14 +161,14 @@ export function OptionsLab({ lab, initialParams }: { lab: LabMeta; initialParams
               />
               <NumberField
                 label="Spot price S"
-                value={params.spot}
+                value={liveParams.spot}
                 onChange={(v) => update("spot", Math.max(0.01, v))}
                 min={0.01} step={5} suffix="$"
                 error={params.spot <= 0 ? "Must be positive." : undefined}
               />
               <NumberField
                 label="Strike price K"
-                value={params.strike}
+                value={liveParams.strike}
                 onChange={(v) => update("strike", Math.max(0.01, v))}
                 min={0.01} step={5} suffix="$"
                 error={params.strike <= 0 ? "Must be positive." : undefined}
@@ -166,7 +176,7 @@ export function OptionsLab({ lab, initialParams }: { lab: LabMeta; initialParams
               <SliderControl
                 label="Time to expiry"
                 symbol={<InlineMath>{"T"}</InlineMath>}
-                value={params.timeToExpiry}
+                value={liveParams.timeToExpiry}
                 min={0} max={5} step={0.05}
                 onChange={(v) => update("timeToExpiry", v)}
                 format={(v) => `${v.toFixed(2)} yr`}
@@ -175,7 +185,7 @@ export function OptionsLab({ lab, initialParams }: { lab: LabMeta; initialParams
               <SliderControl
                 label="Volatility"
                 symbol={<InlineMath>{"\\sigma"}</InlineMath>}
-                value={params.volatility}
+                value={liveParams.volatility}
                 min={0} max={1.2} step={0.01}
                 onChange={(v) => update("volatility", v)}
                 format={(v) => percent(v, 0)}
@@ -184,7 +194,7 @@ export function OptionsLab({ lab, initialParams }: { lab: LabMeta; initialParams
               <SliderControl
                 label="Risk-free rate"
                 symbol={<InlineMath>{"r"}</InlineMath>}
-                value={params.riskFreeRate}
+                value={liveParams.riskFreeRate}
                 min={-0.02} max={0.15} step={0.0025}
                 onChange={(v) => update("riskFreeRate", v)}
                 format={(v) => percent(v, 2)}
@@ -192,7 +202,7 @@ export function OptionsLab({ lab, initialParams }: { lab: LabMeta; initialParams
               <SliderControl
                 label="Dividend yield"
                 symbol={<InlineMath>{"q"}</InlineMath>}
-                value={params.dividendYield}
+                value={liveParams.dividendYield}
                 min={0} max={0.1} step={0.0025}
                 onChange={(v) => update("dividendYield", v)}
                 format={(v) => percent(v, 2)}
@@ -512,7 +522,7 @@ export function OptionsLab({ lab, initialParams }: { lab: LabMeta; initialParams
               <div className="space-y-3.5">
                 <SliderControl
                   label="Simulations"
-                  value={params.simulations}
+                  value={liveParams.simulations}
                   min={100} max={200000} step={100}
                   onChange={(v) => update("simulations", v)}
                   format={(v) => integer(v)}
@@ -520,13 +530,13 @@ export function OptionsLab({ lab, initialParams }: { lab: LabMeta; initialParams
                 />
                 <NumberField
                   label="Random seed"
-                  value={params.seed}
+                  value={liveParams.seed}
                   onChange={(v) => update("seed", Math.max(0, Math.floor(v)))}
                   min={0} step={1}
                 />
                 <Toggle
                   label="Antithetic variates"
-                  checked={params.antithetic === 1}
+                  checked={liveParams.antithetic === 1}
                   onChange={(v) => update("antithetic", v ? 1 : 0)}
                   hint="For each draw Z, also use −Z and average the two payoffs. The two are negatively correlated, so their average has lower variance than two independent draws."
                 />

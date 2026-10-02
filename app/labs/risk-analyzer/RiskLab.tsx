@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useDebounced } from "@/lib/hooks/useBatchedSimulation";
 import {
   Button, Callout, Card, CardBody, CardHeader, MetricCard, MetricGrid,
   SliderControl, NumberField, SelectField, DataTable, Badge,
@@ -28,7 +29,16 @@ import {
 const CONFIDENCE_LEVELS = [0.9, 0.95, 0.99] as const;
 
 export function RiskLab({ lab, initialParams }: { lab: LabMeta; initialParams: RiskParams }) {
-  const [params, setParams] = useState<RiskParams>(initialParams);
+  const [liveParams, setParams] = useState<RiskParams>(initialParams);
+  /**
+   * `liveParams` updates on every mousemove so the slider thumb tracks the
+   * finger. Everything downstream — the simulation AND the chart props — reads
+   * the debounced copy instead, so dragging triggers one recompute and one chart
+   * render rather than one per pixel. The chart captions are also more honest
+   * this way: they describe the parameters that were actually simulated, not a
+   * value the slider is still travelling through.
+   */
+  const params = useDebounced(liveParams, 160);
 
   const update = <K extends keyof RiskParams>(key: K, value: RiskParams[K]) =>
     setParams((previous) => ({ ...previous, [key]: value }));
@@ -167,7 +177,7 @@ export function RiskLab({ lab, initialParams }: { lab: LabMeta; initialParams: R
             <CardBody className="space-y-4">
               <SelectField
                 label="Process"
-                value={params.process}
+                value={liveParams.process}
                 options={(Object.keys(PROCESS_LABELS) as ReturnProcess[]).map((p) => ({
                   value: p,
                   label: PROCESS_LABELS[p],
@@ -181,7 +191,7 @@ export function RiskLab({ lab, initialParams }: { lab: LabMeta; initialParams: R
               {params.process !== "gbm" ? (
                 <SliderControl
                   label="Tail intensity"
-                  value={params.tailParam}
+                  value={liveParams.tailParam}
                   min={0} max={1} step={0.05}
                   onChange={(v) => update("tailParam", v)}
                   format={(v) => v.toFixed(2)}
@@ -191,21 +201,21 @@ export function RiskLab({ lab, initialParams }: { lab: LabMeta; initialParams: R
 
               <SliderControl
                 label="Annual drift"
-                value={params.drift}
+                value={liveParams.drift}
                 min={-0.3} max={0.3} step={0.005}
                 onChange={(v) => update("drift", v)}
                 format={(v) => percent(v, 1)}
               />
               <SliderControl
                 label="Annual volatility"
-                value={params.volatility}
+                value={liveParams.volatility}
                 min={0.05} max={0.6} step={0.01}
                 onChange={(v) => update("volatility", v)}
                 format={(v) => percent(v, 0)}
               />
               <SliderControl
                 label="Trading days"
-                value={params.steps}
+                value={liveParams.steps}
                 min={252} max={5040} step={252}
                 onChange={(v) => update("steps", v)}
                 format={(v) => `${integer(v)} (${(v / 252).toFixed(0)}y)`}
@@ -213,21 +223,21 @@ export function RiskLab({ lab, initialParams }: { lab: LabMeta; initialParams: R
               />
               <SliderControl
                 label="VaR confidence"
-                value={params.confidence}
+                value={liveParams.confidence}
                 min={0.8} max={0.995} step={0.005}
                 onChange={(v) => update("confidence", v)}
                 format={(v) => percent(v, 1)}
               />
               <SliderControl
                 label="Risk-free rate"
-                value={params.riskFreeRate}
+                value={liveParams.riskFreeRate}
                 min={0} max={0.1} step={0.0025}
                 onChange={(v) => update("riskFreeRate", v)}
                 format={(v) => percent(v, 2)}
               />
               <NumberField
                 label="Random seed"
-                value={params.seed}
+                value={liveParams.seed}
                 onChange={(v) => update("seed", Math.max(0, Math.floor(v)))}
                 min={0} step={1}
               />

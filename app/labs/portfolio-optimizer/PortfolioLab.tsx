@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useDebounced } from "@/lib/hooks/useBatchedSimulation";
 import {
   Button, Callout, Card, CardBody, CardHeader, MetricCard, MetricGrid,
   SliderControl, NumberField, Toggle, DataTable, ErrorState,
@@ -31,7 +32,16 @@ const CORR_KEYS: Record<string, keyof PortfolioLabParams> = {
 };
 
 export function PortfolioLab({ lab, initialParams }: { lab: LabMeta; initialParams: PortfolioLabParams }) {
-  const [params, setParams] = useState<PortfolioLabParams>(initialParams);
+  const [liveParams, setParams] = useState<PortfolioLabParams>(initialParams);
+  /**
+   * `liveParams` updates on every mousemove so the slider thumb tracks the
+   * finger. Everything downstream — the simulation AND the chart props — reads
+   * the debounced copy instead, so dragging triggers one recompute and one chart
+   * render rather than one per pixel. The chart captions are also more honest
+   * this way: they describe the parameters that were actually simulated, not a
+   * value the slider is still travelling through.
+   */
+  const params = useDebounced(liveParams, 160);
 
   const update = <K extends keyof PortfolioLabParams>(key: K, value: PortfolioLabParams[K]) =>
     setParams((previous) => ({ ...previous, [key]: value }));
@@ -232,7 +242,7 @@ export function PortfolioLab({ lab, initialParams }: { lab: LabMeta; initialPara
                 />
                 <SliderControl
                   label="Risk-free rate"
-                  value={params.riskFreeRate}
+                  value={liveParams.riskFreeRate}
                   min={0} max={0.1} step={0.0025}
                   onChange={(v) => update("riskFreeRate", v)}
                   format={(v) => percent(v, 2)}
@@ -240,14 +250,14 @@ export function PortfolioLab({ lab, initialParams }: { lab: LabMeta; initialPara
                 />
                 <SliderControl
                   label="Random portfolios"
-                  value={params.randomPortfolios}
+                  value={liveParams.randomPortfolios}
                   min={500} max={20000} step={500}
                   onChange={(v) => update("randomPortfolios", v)}
                   format={(v) => integer(v)}
                 />
                 <NumberField
                   label="Random seed"
-                  value={params.seed}
+                  value={liveParams.seed}
                   onChange={(v) => update("seed", Math.max(0, Math.floor(v)))}
                   min={0} step={1}
                 />

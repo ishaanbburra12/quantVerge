@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useDebounced } from "@/lib/hooks/useBatchedSimulation";
 import {
   Button, Callout, Card, CardBody, CardHeader, MetricCard, MetricGrid,
   SliderControl, NumberField, DataTable, Badge,
@@ -31,7 +32,16 @@ interface GridResult {
 }
 
 export function OverfittingLab({ lab, initialParams }: { lab: LabMeta; initialParams: OverfittingParams }) {
-  const [params, setParams] = useState<OverfittingParams>(initialParams);
+  const [liveParams, setParams] = useState<OverfittingParams>(initialParams);
+  /**
+   * `liveParams` updates on every mousemove so the slider thumb tracks the
+   * finger. Everything downstream — the simulation AND the chart props — reads
+   * the debounced copy instead, so dragging triggers one recompute and one chart
+   * render rather than one per pixel. The chart captions are also more honest
+   * this way: they describe the parameters that were actually simulated, not a
+   * value the slider is still travelling through.
+   */
+  const params = useDebounced(liveParams, 160);
 
   const update = <K extends keyof OverfittingParams>(key: K, value: OverfittingParams[K]) =>
     setParams((previous) => ({ ...previous, [key]: value }));
@@ -178,7 +188,7 @@ export function OverfittingLab({ lab, initialParams }: { lab: LabMeta; initialPa
               <SliderControl
                 label="True signal strength"
                 symbol={<InlineMath>{"\\varphi"}</InlineMath>}
-                value={params.signalStrength}
+                value={liveParams.signalStrength}
                 min={0} max={0.3} step={0.01}
                 onChange={(v) => update("signalStrength", v)}
                 format={(v) => (v === 0 ? "0 — no signal" : v.toFixed(2))}
@@ -195,7 +205,7 @@ export function OverfittingLab({ lab, initialParams }: { lab: LabMeta; initialPa
               ) : null}
               <SliderControl
                 label="Parameter combinations searched"
-                value={params.gridSize}
+                value={liveParams.gridSize}
                 min={12} max={240} step={12}
                 onChange={(v) => update("gridSize", v)}
                 format={(v) => integer(v)}
@@ -203,42 +213,42 @@ export function OverfittingLab({ lab, initialParams }: { lab: LabMeta; initialPa
               />
               <SliderControl
                 label="Total trading days"
-                value={params.steps}
+                value={liveParams.steps}
                 min={756} max={10080} step={252}
                 onChange={(v) => update("steps", v)}
                 format={(v) => `${integer(v)} (${(v / 252).toFixed(0)}y)`}
               />
               <SliderControl
                 label="Training fraction"
-                value={params.trainFraction}
+                value={liveParams.trainFraction}
                 min={0.3} max={0.7} step={0.05}
                 onChange={(v) => update("trainFraction", v)}
                 format={(v) => percent(v, 0)}
               />
               <SliderControl
                 label="Validation fraction"
-                value={params.validationFraction}
+                value={liveParams.validationFraction}
                 min={0.1} max={0.4} step={0.05}
                 onChange={(v) => update("validationFraction", v)}
                 format={(v) => percent(v, 0)}
               />
               <SliderControl
                 label="Transaction cost"
-                value={params.transactionCost}
+                value={liveParams.transactionCost}
                 min={0} max={0.003} step={0.00025}
                 onChange={(v) => update("transactionCost", v)}
                 format={(v) => `${(v * 100).toFixed(3)}%`}
               />
               <SliderControl
                 label="Annual volatility"
-                value={params.volatility}
+                value={liveParams.volatility}
                 min={0.05} max={0.5} step={0.01}
                 onChange={(v) => update("volatility", v)}
                 format={(v) => percent(v, 0)}
               />
               <NumberField
                 label="Market seed"
-                value={params.seed}
+                value={liveParams.seed}
                 onChange={(v) => update("seed", Math.max(0, Math.floor(v)))}
                 min={0} step={1}
               />
