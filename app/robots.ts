@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/siteUrl";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://quantverge.example";
+const BASE_URL = getSiteUrl();
 
 export default function robots(): MetadataRoute.Robots {
   return {

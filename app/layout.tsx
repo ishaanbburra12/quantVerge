@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getSiteUrl } from "@/lib/siteUrl";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
@@ -6,7 +7,7 @@ import { ResearchModeProvider } from "@/components/providers/ResearchModeProvide
 import { Navigation } from "@/components/Navigation";
 import { Footer } from "@/components/Footer";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://quantverge.example";
+const SITE_URL = getSiteUrl();
 
 export const metadata: Metadata = {
   // metadataBase lets Next resolve relative Open Graph and canonical URLs. Without

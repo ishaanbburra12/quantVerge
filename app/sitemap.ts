@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/siteUrl";
 import { LABS } from "@/content/labs";
 import { LESSONS } from "@/content/lessons";
 import { JOURNAL_POSTS } from "@/content/journal";
@@ -9,7 +10,7 @@ import { MODULES } from "@/content/lessons";
  * from, so a new lab or lesson appears here automatically. A hand-maintained
  * sitemap drifts out of date the first time someone forgets to update it.
  */
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://quantverge.example";
+const BASE_URL = getSiteUrl();
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
