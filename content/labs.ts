@@ -155,6 +155,18 @@ export const LABS: LabMeta[] = [
     status: "available",
   },
   {
+    slug: "pca",
+    title: "PCA & Factor Lab",
+    tagline: "Watch a mechanical procedure discover level, slope and curvature.",
+    description:
+      "Principal component analysis on yield-curve changes and asset returns. The algorithm is given a matrix of numbers and no information about what it means, and recovers the factor structure anyway — which is the empirical foundation under CAPM and under how every rates desk hedges.",
+    difficulty: 3,
+    concepts: ["Eigendecomposition", "Variance explained", "Factor models", "Level/slope/curvature", "Dimensionality reduction"],
+    minutes: 22,
+    category: "Portfolio & risk",
+    status: "available",
+  },
+  {
     slug: "inference",
     title: "Statistical Inference Lab",
     tagline: "What a significant result establishes, and what it does not.",
