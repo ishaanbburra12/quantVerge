@@ -155,6 +155,30 @@ export const LABS: LabMeta[] = [
     status: "available",
   },
   {
+    slug: "garch",
+    title: "GARCH Volatility Lab",
+    tagline: "Volatility that changes, fitted by maximum likelihood.",
+    description:
+      "Every other model here treats volatility as a constant, which is contradicted by the most robust fact in finance. GARCH makes today's variance a function of yesterday's surprise — then the lab fits the model back to its own output to see whether the parameters are recoverable from returns alone.",
+    difficulty: 4,
+    concepts: ["Volatility clustering", "Maximum likelihood", "Persistence & half-life", "Variance forecasting", "Conditional heteroskedasticity"],
+    minutes: 25,
+    category: "Probability & simulation",
+    status: "available",
+  },
+  {
+    slug: "binomial",
+    title: "Binomial Tree Lab",
+    tagline: "Pricing the early exercise that no formula can express.",
+    description:
+      "A Cox-Ross-Rubinstein tree converging to Black-Scholes, and then doing what Black-Scholes cannot: pricing American options, where a hold-or-exercise decision at every node means no closed form exists.",
+    difficulty: 3,
+    concepts: ["Backward induction", "Risk-neutral probability", "Early exercise", "Optimal stopping", "Discretisation error"],
+    minutes: 22,
+    category: "Derivatives",
+    status: "available",
+  },
+  {
     slug: "pca",
     title: "PCA & Factor Lab",
     tagline: "Watch a mechanical procedure discover level, slope and curvature.",

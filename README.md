@@ -61,7 +61,7 @@ failed or needed revision. Failed experiments stay visible.
 
 ## Features
 
-### Twelve laboratories
+### Fifteen laboratories
 
 | Lab | Level | What it demonstrates |
 | --- | --- | --- |
@@ -77,6 +77,9 @@ failed or needed revision. Failed experiments stay visible.
 | **Random Walk vs Structure** | 2 | Four processes, autocorrelation of returns vs squared returns |
 | **Fixed Income** | 2 | Bond pricing, duration, convexity, DV01, yield curves, forward rates |
 | **Statistical Inference** | 2 | Hypothesis testing, p-values, power, Type I/II errors, multiple testing |
+| **PCA & Factors** | 3 | Eigendecomposition, variance explained, level/slope/curvature, market factor |
+| **GARCH** | 4 | Volatility clustering, maximum likelihood, persistence, variance forecasting |
+| **Binomial Tree** | 3 | Backward induction, early exercise, optimal stopping, convergence |
 
 ### Learn, research and reference
 
@@ -125,7 +128,7 @@ quantverge/
 │   ├── math/                   # RNG, distributions, linear algebra
 │   ├── simulation/             # GBM, AR(1), OU, jump diffusion, regime switching
 │   └── statistics/             # Descriptive statistics
-└── tests/                      # 349 numerical tests
+└── tests/                      # 426 numerical tests
 ```
 
 ### Two architectural decisions worth explaining
@@ -157,6 +160,9 @@ the obsolete run instead of finishing it.
 | **Portfolio** | Quadratic forms, Cholesky decomposition, Gaussian elimination with partial pivoting, closed-form minimum-variance and tangency portfolios, exact efficient frontier via Lagrangian, Euler risk decomposition |
 | **Fixed income** | Discounted cash flow pricing, yield to maturity by bisection, Macaulay and modified duration, convexity, DV01, Nelson-Siegel yield curves, no-arbitrage forward rates |
 | **Inference** | Regularised incomplete beta by continued fraction, Student-t CDF and inverse, one-sample t-test, statistical power, Bonferroni and Benjamini-Hochberg corrections |
+| **Factors** | Cyclic Jacobi eigendecomposition for symmetric matrices, PCA on covariance or correlation, component scores, reconstruction |
+| **Volatility** | GARCH(1,1) simulation, Gaussian log-likelihood, maximum likelihood estimation via Nelder-Mead in a constrained-to-unconstrained reparameterisation, variance term structure |
+| **Trees** | Cox-Ross-Rubinstein recombining binomial tree, backward induction, American early exercise, convergence profiling |
 
 ### Three implementation details that are easy to get wrong
 
@@ -199,7 +205,7 @@ npm run test:watch   # Tests in watch mode
 
 ## Testing
 
-349 tests across 10 files, all numerical. The suite checks three kinds of thing:
+426 tests across 15 files, all numerical. The suite checks three kinds of thing:
 
 **Known analytic values.** Black-Scholes reproduces the canonical textbook case (call `10.450584`,
 put `5.573526`) to six decimal places. The normal CDF matches published standard-normal values to ten
@@ -287,15 +293,14 @@ understated rather than overstated.
 
 ## Roadmap
 
-**Done** — design system, navigation, all twelve labs, 28 lessons, 10 code walkthroughs, glossary,
+**Done** — design system, navigation, all fifteen labs, 28 lessons, 10 code walkthroughs, glossary,
 challenges, research framework, experiment log, journal, Research Mode, reproducibility layer,
 sitemap and robots, WCAG AA contrast throughout, 349 tests.
 
-**Known gaps, in priority order** — PCA and eigendecomposition; CAPM and Fama-French factor
-models; GARCH volatility modelling; binomial trees and American exercise; maximum likelihood
-estimation; credit risk and default modelling; market microstructure and order books; the RL agent
-implementation. These are listed because the honest answer to "does this cover everything a quant
-needs" is no, and a roadmap is more useful than a claim.
+**Known gaps, in priority order** — credit risk and default modelling; Fama-French multi-factor
+models built on the PCA foundation; market microstructure and order-book simulation; stochastic
+calculus notes; the RL agent implementation. These are listed because the honest answer to "does
+this cover everything a quant needs" is no, and a roadmap is more useful than a claim.
 
 **Later** — pairs trading and cointegration; Kalman filters; neural network function approximation;
 market microstructure and order-book simulation; stochastic calculus notes.
