@@ -155,6 +155,18 @@ export const LABS: LabMeta[] = [
     status: "available",
   },
   {
+    slug: "credit",
+    title: "Credit Risk Lab",
+    tagline: "Why a company's equity is a call option on its own assets.",
+    description:
+      "The Merton structural model. Shareholders with limited liability hold max(V − D, 0), which is a call struck at the face value of the debt — so default probability, credit spread and recovery all follow from Black-Scholes applied to the firm itself.",
+    difficulty: 3,
+    concepts: ["Structural models", "Default probability", "Credit spreads", "Distance to default", "Recovery", "Default correlation"],
+    minutes: 24,
+    category: "Rates & credit",
+    status: "available",
+  },
+  {
     slug: "garch",
     title: "GARCH Volatility Lab",
     tagline: "Volatility that changes, fitted by maximum likelihood.",

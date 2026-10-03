@@ -61,7 +61,7 @@ failed or needed revision. Failed experiments stay visible.
 
 ## Features
 
-### Fifteen laboratories
+### Sixteen laboratories
 
 | Lab | Level | What it demonstrates |
 | --- | --- | --- |
@@ -80,10 +80,11 @@ failed or needed revision. Failed experiments stay visible.
 | **PCA & Factors** | 3 | Eigendecomposition, variance explained, level/slope/curvature, market factor |
 | **GARCH** | 4 | Volatility clustering, maximum likelihood, persistence, variance forecasting |
 | **Binomial Tree** | 3 | Backward induction, early exercise, optimal stopping, convergence |
+| **Credit Risk** | 3 | Merton model, equity as a call on assets, default probability, spreads, recovery |
 
 ### Learn, research and reference
 
-- **28 lessons** across **10 modules** in dependency order, each with a definition, intuition,
+- **42 lessons** across **13 modules** in dependency order, each with a definition, intuition,
   formula, worked example, and a link to the lab that demonstrates it.
 - **10 code walkthroughs** — one per module — covering what the code does, why the mathematics
   works, every variable, the failure modes that return a plausible wrong answer rather than an
@@ -128,7 +129,7 @@ quantverge/
 │   ├── math/                   # RNG, distributions, linear algebra
 │   ├── simulation/             # GBM, AR(1), OU, jump diffusion, regime switching
 │   └── statistics/             # Descriptive statistics
-└── tests/                      # 426 numerical tests
+└── tests/                      # 457 numerical tests
 ```
 
 ### Two architectural decisions worth explaining
@@ -163,6 +164,7 @@ the obsolete run instead of finishing it.
 | **Factors** | Cyclic Jacobi eigendecomposition for symmetric matrices, PCA on covariance or correlation, component scores, reconstruction |
 | **Volatility** | GARCH(1,1) simulation, Gaussian log-likelihood, maximum likelihood estimation via Nelder-Mead in a constrained-to-unconstrained reparameterisation, variance term structure |
 | **Trees** | Cox-Ross-Rubinstein recombining binomial tree, backward induction, American early exercise, convergence profiling |
+| **Credit** | Merton structural model, equity as a call on firm assets, risk-neutral and real-world default probabilities, credit spread term structure, implied equity volatility, portfolio loss distribution |
 
 ### Three implementation details that are easy to get wrong
 
@@ -205,7 +207,7 @@ npm run test:watch   # Tests in watch mode
 
 ## Testing
 
-426 tests across 15 files, all numerical. The suite checks three kinds of thing:
+457 tests across 16 files, all numerical. The suite checks three kinds of thing:
 
 **Known analytic values.** Black-Scholes reproduces the canonical textbook case (call `10.450584`,
 put `5.573526`) to six decimal places. The normal CDF matches published standard-normal values to ten
@@ -293,14 +295,15 @@ understated rather than overstated.
 
 ## Roadmap
 
-**Done** — design system, navigation, all fifteen labs, 28 lessons, 10 code walkthroughs, glossary,
+**Done** — design system, navigation, all sixteen labs, 42 lessons, 10 code walkthroughs, glossary,
 challenges, research framework, experiment log, journal, Research Mode, reproducibility layer,
 sitemap and robots, WCAG AA contrast throughout, 349 tests.
 
-**Known gaps, in priority order** — credit risk and default modelling; Fama-French multi-factor
-models built on the PCA foundation; market microstructure and order-book simulation; stochastic
-calculus notes; the RL agent implementation. These are listed because the honest answer to "does
-this cover everything a quant needs" is no, and a roadmap is more useful than a claim.
+**Known gaps, in priority order** — market microstructure and order-book simulation; Fama-French
+multi-factor models built on the PCA foundation; stochastic calculus derivations; the RL agent
+implementation that the research framework specifies but does not yet contain. These are listed
+because the honest answer to "does this cover everything a quant needs" is no, and a roadmap is more
+useful than a claim. No website replaces a degree, real programming depth, or interview practice.
 
 **Later** — pairs trading and cointegration; Kalman filters; neural network function approximation;
 market microstructure and order-book simulation; stochastic calculus notes.

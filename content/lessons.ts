@@ -46,7 +46,7 @@ export const MODULES: Module[] = [
     number: 3,
     title: "Correlation and covariance",
     summary: "How two series move together, and why that single number does most of the work in portfolio construction.",
-    lessons: ["covariance", "correlation"],
+    lessons: ["covariance", "correlation", "principal-component-analysis"],
   },
   {
     number: 4,
@@ -58,7 +58,7 @@ export const MODULES: Module[] = [
     number: 5,
     title: "Time series",
     summary: "Memory, stationarity, and the diagnostics that distinguish structure from noise.",
-    lessons: ["autocorrelation", "stationarity", "linear-regression"],
+    lessons: ["autocorrelation", "stationarity", "linear-regression", "volatility-clustering"],
   },
   {
     number: 6,
@@ -89,6 +89,27 @@ export const MODULES: Module[] = [
     title: "Reinforcement learning",
     summary: "States, actions, policies and rewards — and why reward design is the hard part.",
     lessons: ["reinforcement-learning"],
+  },
+  {
+    number: 11,
+    title: "Statistical inference",
+    summary:
+      "What a significant result establishes and what it does not. The machinery every empirical claim in finance rests on, and the specific ways it is misused.",
+    lessons: ["hypothesis-testing", "p-values", "statistical-power", "multiple-testing"],
+  },
+  {
+    number: 12,
+    title: "Derivatives",
+    summary:
+      "Options, the formula that prices them, the sensitivities that hedge them, and the tree that prices what the formula cannot.",
+    lessons: ["options-basics", "black-scholes", "the-greeks", "binomial-trees"],
+  },
+  {
+    number: 13,
+    title: "Fixed income and credit",
+    summary:
+      "Bonds, where the cash flows are certain and the whole risk is that the discount rate moves — and then what happens when the cash flows are not certain after all.",
+    lessons: ["bond-pricing", "duration-and-convexity", "yield-curves", "credit-risk"],
   },
 ];
 
@@ -737,6 +758,384 @@ export const LESSONS: Lesson[] = [
       "RL is a natural fit for sequential decision-making under uncertainty, which describes trading well. It is also extremely prone to overfitting its training environment — which is exactly why the research question on this site is about robustness under distribution shift rather than about peak performance.",
     demo: { labSlug: "backtesting", label: "Compare an Oracle policy against simple rules" },
     prerequisites: ["machine-learning", "markov-chains", "distribution-shift"],
+  },
+
+  {
+    slug: "principal-component-analysis",
+    module: 3,
+    title: "Principal component analysis",
+    definition:
+      "A method for finding the directions along which correlated variables vary most, by taking the eigendecomposition of their covariance matrix.",
+    intuition:
+      "Plot two correlated series and the cloud is a tilted ellipse rather than a circle. PCA rotates the axes to line up with that ellipse: the first new axis runs along the long direction, the second at right angles to it. You still have the same number of variables, but now they are uncorrelated and the first few carry most of the information.",
+    formula: "\\boldsymbol{\\Sigma}\\mathbf{v}_i = \\lambda_i \\mathbf{v}_i, \\qquad \\text{share}_i = \\frac{\\lambda_i}{\\sum_j \\lambda_j}",
+    formulaNote:
+      "Eigenvectors are the directions, eigenvalues are the variance along each. Because a covariance matrix is symmetric, the eigenvalues are guaranteed real and the eigenvectors orthogonal — which is why the components are uncorrelated.",
+    example: {
+      prompt: "You run PCA on daily changes in ten points along a yield curve. What do you expect to find?",
+      working: [
+        "PC1: every loading the same sign and roughly equal — the whole curve shifting up or down together.",
+        "PC2: loadings running from negative at the short end to positive at the long end — the curve tilting.",
+        "PC3: ends of one sign, middle of the other — the curve bulging.",
+        "Together these typically explain 95-99% of all curve variation.",
+      ],
+      answer:
+        "Level, slope and curvature. Nothing told the algorithm what a yield curve is — it found three shapes in a matrix of numbers, and they turn out to have clean economic meanings.",
+    },
+    whyItMatters:
+      "It is how a ten-dimensional hedging problem becomes a three-dimensional one, and it is the empirical foundation under factor models: run PCA on stock returns and the first component is almost always 'the market', explaining 30-50% of individual stock variance without anyone imposing it.",
+    demo: { labSlug: "pca", label: "Watch PCA recover level, slope and curvature" },
+    prerequisites: ["correlation", "covariance"],
+  },
+  {
+    slug: "volatility-clustering",
+    module: 5,
+    title: "Volatility clustering and GARCH",
+    definition:
+      "The tendency of large price moves to be followed by more large moves, and calm periods by more calm — and the model family built to capture it.",
+    intuition:
+      "Returns are nearly unpredictable but their SIZE is not. A turbulent week genuinely tells you something about next week's turbulence, while telling you nothing about direction. GARCH makes today's variance an explicit function of yesterday's surprise and yesterday's variance, turning volatility into a forecastable quantity.",
+    formula: "\\sigma_t^2 = \\omega + \\alpha\\,\\varepsilon_{t-1}^2 + \\beta\\,\\sigma_{t-1}^2",
+    formulaNote:
+      "The sum alpha + beta is the persistence, and it is the number that matters: expected shock half-life is ln(0.5)/ln(alpha+beta). Fitted equity models typically land around 0.95-0.99, implying shocks that take weeks or months to decay. Stationarity requires the sum to be below 1.",
+    example: {
+      prompt: "A fitted GARCH model gives alpha = 0.08 and beta = 0.90. What does that tell you?",
+      working: [
+        "Persistence = 0.08 + 0.90 = 0.98.",
+        "Long-run variance = omega / (1 - 0.98) = omega / 0.02, so omega is multiplied fifty-fold.",
+        "Half-life = ln(0.5) / ln(0.98) = 34 days.",
+        "So half of any volatility shock is still present over a month later.",
+      ],
+      answer:
+        "Volatility is highly persistent. A spike today is still half-present in 34 trading days, which is why a turbulent month is genuine information about the next one.",
+    },
+    whyItMatters:
+      "It is the one forecasting problem in finance that genuinely works. Volatility is estimable from a few weeks of data while a mean return needs years, which is why volatility forecasting became a mature field and return forecasting did not. Every option price depends on a volatility forecast.",
+    demo: { labSlug: "garch", label: "Fit GARCH by maximum likelihood" },
+    prerequisites: ["autocorrelation", "variance-and-standard-deviation"],
+  },
+  {
+    slug: "hypothesis-testing",
+    module: 11,
+    title: "Hypothesis testing",
+    definition:
+      "A procedure for deciding whether observed data is surprising enough, under an assumption of no effect, to reject that assumption.",
+    intuition:
+      "You assume nothing is going on — the null hypothesis — and ask how unusual your data would be if that were true. If it would be very unusual, you reject the assumption. Note what this does NOT do: it never establishes that the null is false, only that the data sits in its tail.",
+    formula: "t = \\frac{\\bar{x} - \\mu_0}{s/\\sqrt{n}}",
+    formulaNote:
+      "The denominator is the standard error of the MEAN, not the standard deviation of the data. Confusing the two changes every p-value by a factor of the square root of n, and it is the single most common error in applied statistics.",
+    example: {
+      prompt: "A strategy returns 0.8% a month over 24 months, with a monthly standard deviation of 3%. Is it profitable?",
+      working: [
+        "Standard error = 3% / sqrt(24) = 0.61%.",
+        "t = 0.8 / 0.61 = 1.31, with 23 degrees of freedom.",
+        "The two-sided critical value at 5% is about 2.07.",
+        "1.31 < 2.07, so we cannot reject the null that the true mean is zero.",
+      ],
+      answer:
+        "Not demonstrably. Two years of apparently decent returns is not enough evidence to distinguish an 0.8% monthly edge from luck.",
+    },
+    whyItMatters:
+      "Every claim that a strategy works, a factor is real or a model beats a benchmark is a hypothesis test, whether or not anyone writes it down. Doing it explicitly forces you to confront how little a short track record actually establishes.",
+    demo: { labSlug: "inference", label: "Run tests on data where you set the truth" },
+    prerequisites: ["normal-distribution", "variance-and-standard-deviation"],
+  },
+  {
+    slug: "p-values",
+    module: 11,
+    title: "p-values and what they are not",
+    definition:
+      "The probability of observing data at least as extreme as yours, assuming the null hypothesis is true.",
+    intuition:
+      "A p-value measures surprise under an assumption. The crucial structural fact: under a TRUE null hypothesis, the p-value is uniformly distributed between 0 and 1. That is exactly why a threshold of 0.05 produces a 5% false-positive rate — the fraction of a uniform distribution below 0.05 is 0.05.",
+    formula: "p = P(\\text{data this extreme} \\mid H_0 \\text{ true})",
+    formulaNote:
+      "Read the conditional carefully. This is NOT P(H_0 true | data), which is what people usually want and what Bayes' theorem would be needed to compute. Reversing a conditional probability is the same error as the medical-test problem in the Probability Playground.",
+    example: {
+      prompt: "You get p = 0.03. Which of these are true: (a) there is a 3% chance the null is true, (b) there is a 97% chance of replication, (c) data this extreme occurs 3% of the time when nothing is going on?",
+      working: [
+        "(a) is false — that would be P(null | data), the reversed conditional.",
+        "(b) is false — replication probability for p = 0.03 is closer to 50% than 97%.",
+        "(c) is the definition, and is the only one that is true.",
+        "A p-value says nothing about effect size, importance, or whether the hypothesis was plausible to begin with.",
+      ],
+      answer:
+        "Only (c). The other two are the two most common misreadings, and both overstate what has been established.",
+    },
+    whyItMatters:
+      "Significance is routinely treated as proof. It is a statement about one test in isolation, under a specific assumption, and it stops meaning what it says the moment several tests are run — which in strategy research is always.",
+    demo: { labSlug: "inference", label: "See the p-value distribution under a true null", query: "trueEffect=0" },
+    prerequisites: ["hypothesis-testing"],
+  },
+  {
+    slug: "statistical-power",
+    module: 11,
+    title: "Statistical power",
+    definition: "The probability of correctly rejecting the null hypothesis when it is actually false.",
+    intuition:
+      "Power is the chance your study can detect a real effect. It is the quantity nobody computes and everybody needs, because a low-powered study that finds nothing has learned nothing — it could not have found the effect even if it were there.",
+    formula: "1 - \\beta = \\Phi\\!\\left(\\frac{\\delta}{\\sigma/\\sqrt{n}} - z_{1-\\alpha/2}\\right)",
+    formulaNote:
+      "Lowering alpha reduces false positives and reduces power at the same time. There is no setting of alpha that improves both; the only way to reduce both error types is more data.",
+    example: {
+      prompt: "How long must you track a strategy with a true Sharpe of 0.5 before its edge is statistically distinguishable from zero?",
+      working: [
+        "The standard error of an estimated Sharpe is roughly sqrt((1 + S^2/2)/n) with n years.",
+        "Require 0.5 / sqrt(1.125/n) > 1.96.",
+        "sqrt(n) > 1.96 * 1.0607 / 0.5 = 4.158.",
+        "n > 17.3.",
+      ],
+      answer:
+        "Eighteen years. A genuinely good strategy needs most of a career before its edge is statistically established — which is why conviction in any strategy rests on reasoning rather than evidence.",
+    },
+    whyItMatters:
+      "It explains why finance is hard in a way other fields are not. Effects are small, noise is large, and you cannot collect another century of market history, so some questions are permanently unanswerable at conventional thresholds.",
+    demo: { labSlug: "inference", label: "See power collapse to alpha when there is no effect" },
+    prerequisites: ["hypothesis-testing", "p-values"],
+  },
+  {
+    slug: "multiple-testing",
+    module: 11,
+    title: "Multiple testing",
+    definition:
+      "The inflation of false-positive rates that occurs when many hypotheses are tested and the best result is reported.",
+    intuition:
+      "Each test at 5% has a 5% chance of a false positive. Run twenty and the chance of at least one is not 5% — it is 64%. Run a hundred and it is 99.4%. Nothing has gone wrong with any individual test; the problem is the selection applied afterwards.",
+    formula: "P(\\text{at least one false positive}) = 1 - (1-\\alpha)^m",
+    formulaNote:
+      "Bonferroni controls this by testing each hypothesis at alpha/m, which is exact but severe. Benjamini-Hochberg instead controls the expected PROPORTION of rejections that are false, which is far less punishing and usually the better trade when screening many candidates.",
+    example: {
+      prompt: "A researcher reports a factor significant at p = 0.01. What is the single most important thing to ask?",
+      working: [
+        "How many factors did they test?",
+        "If one, p = 0.01 is meaningful evidence.",
+        "If a hundred, the expected number of results at p < 0.01 under pure noise is exactly one.",
+        "The result is then entirely unremarkable, and indistinguishable from nothing.",
+      ],
+      answer:
+        "How many hypotheses were tested. Without it the p-value cannot be interpreted at all — and it is almost never reported.",
+    },
+    whyItMatters:
+      "This is the same mechanism as backtest overfitting, in statistical rather than financial clothing. Every parameter you adjusted after seeing a result was a test, which makes the effective number of tests enormous and unknown.",
+    demo: { labSlug: "inference", label: "Watch false positives accumulate across true nulls" },
+    prerequisites: ["p-values"],
+  },
+  {
+    slug: "options-basics",
+    module: 12,
+    title: "What an option is",
+    definition:
+      "A contract giving the right, but not the obligation, to buy (a call) or sell (a put) an asset at a fixed strike price.",
+    intuition:
+      "The asymmetry is everything. A buyer's loss is capped at the premium while the gain is not, which makes uncertainty valuable rather than merely costly. That is why an option's value rises with volatility for both calls and puts.",
+    formula: "\\text{Call payoff} = \\max(S_T - K,\\, 0), \\qquad \\text{Put payoff} = \\max(K - S_T,\\, 0)",
+    formulaNote:
+      "Put-call parity, C - P = S e^{-qT} - K e^{-rT}, is a pure no-arbitrage identity. It holds regardless of whether any particular pricing model is correct, which makes it the sharpest available check on an implementation.",
+    example: {
+      prompt: "Why does an option's value rise with volatility, for both calls and puts?",
+      working: [
+        "Higher volatility widens the distribution of possible final prices.",
+        "The extra upside raises the payoff in favourable outcomes.",
+        "The extra downside does not increase the loss, because the payoff is floored at zero.",
+        "Only the favourable half of the extra uncertainty is actually collected.",
+      ],
+      answer:
+        "The payoff is a truncated function of the final price, so widening the distribution adds value on one side and nothing on the other. Uncertainty is an asset to an option holder.",
+    },
+    whyItMatters:
+      "Options are how risk is transferred and priced. Their asymmetric payoff also appears far beyond derivatives — limited liability makes a company's equity a call option on its assets, which is the whole content of the Credit Risk lab.",
+    demo: { labSlug: "options", label: "Price options and see put-call parity hold" },
+    prerequisites: ["normal-distribution", "geometric-brownian-motion"],
+  },
+  {
+    slug: "black-scholes",
+    module: 12,
+    title: "The Black-Scholes formula",
+    definition:
+      "A closed-form price for a European option, derived from the assumption that the underlying follows geometric Brownian motion and that the option can be replicated by continuously trading the underlying and cash.",
+    intuition:
+      "Read the call formula as a portfolio: you expect to receive the stock with one (reweighted) probability and pay the strike with another, discounted to today. The striking feature is what is absent — the asset's real expected return never appears.",
+    formula: "C = S e^{-qT} N(d_1) - K e^{-rT} N(d_2), \\qquad d_1 = \\frac{\\ln(S/K) + (r - q + \\sigma^2/2)T}{\\sigma\\sqrt{T}}",
+    formulaNote:
+      "N(d2) is the risk-neutral probability of finishing in the money. N(d1) is that probability reweighted by the value of the stock, and is also the call's delta. They differ by sigma*sqrt(T), which is why they converge as expiry approaches.",
+    example: {
+      prompt: "Two analysts disagree completely about whether a stock will rise. Must they disagree about its option prices?",
+      working: [
+        "The formula's inputs are S, K, T, r, q and sigma.",
+        "The stock's expected return mu appears nowhere.",
+        "This is because the option can be replicated by trading the stock and cash.",
+        "Replication requires knowing how much the stock moves, not which way.",
+      ],
+      answer:
+        "No. They must agree, provided they agree on volatility. All the disagreement is displaced into a single number, which is why traders quote and argue in implied volatility rather than price.",
+    },
+    whyItMatters:
+      "It is the most used formula in finance, and every assumption behind it is false in some measurable way. Its value is as a common language: it converts prices into implied volatilities, which are comparable in a way prices are not.",
+    demo: { labSlug: "options", label: "Compare the formula against Monte Carlo" },
+    prerequisites: ["options-basics", "geometric-brownian-motion"],
+  },
+  {
+    slug: "the-greeks",
+    module: 12,
+    title: "The Greeks",
+    definition:
+      "The partial derivatives of an option's price with respect to each of its inputs.",
+    intuition:
+      "If the price is a function of several variables, the Greeks are its slopes. Delta is how much the price moves per unit of the underlying; gamma is how fast delta itself changes; vega is sensitivity to volatility; theta is the loss from time passing.",
+    formula: "\\Delta = \\frac{\\partial V}{\\partial S}, \\quad \\Gamma = \\frac{\\partial^2 V}{\\partial S^2}, \\quad \\nu = \\frac{\\partial V}{\\partial \\sigma}, \\quad \\Theta = \\frac{\\partial V}{\\partial t}",
+    formulaNote:
+      "Gamma and vega are identical for calls and puts, which follows directly from put-call parity: the difference between them is linear in S and contains no volatility, so differentiating twice in S or once in sigma eliminates it.",
+    example: {
+      prompt: "You are delta-hedged. Why might you still lose money?",
+      working: [
+        "Delta hedging neutralises the FIRST derivative with respect to the underlying.",
+        "Gamma is the second derivative, and it is not neutralised.",
+        "A large move makes your delta stale before you can rebalance.",
+        "You also pay theta continuously for holding the position.",
+      ],
+      answer:
+        "Delta neutrality is local and instantaneous. Gamma means it decays as the underlying moves, and theta means it costs money to maintain — which is the fundamental trade of options market making.",
+    },
+    whyItMatters:
+      "Greeks are how derivative risk is actually managed. A desk does not think about option prices; it thinks about its aggregate delta, gamma and vega, and hedges those.",
+    demo: { labSlug: "options", label: "See all five Greeks across spot prices" },
+    prerequisites: ["black-scholes"],
+  },
+  {
+    slug: "binomial-trees",
+    module: 12,
+    title: "Binomial trees and early exercise",
+    definition:
+      "A discrete model in which the underlying moves up or down by fixed multipliers each period, priced by working backwards from the payoff at expiry.",
+    intuition:
+      "At every node you solve a one-period problem by replication. Rolling backwards turns a sequence of trivial problems into a price. The reason to bother, given Black-Scholes exists, is that a tree can handle a decision at every node — which is what American exercise requires and what no formula can express.",
+    formula: "u = e^{\\sigma\\sqrt{\\Delta t}}, \\quad d = 1/u, \\quad p = \\frac{e^{(r-q)\\Delta t} - d}{u - d}",
+    formulaNote:
+      "Choosing d = 1/u makes the tree recombine, reducing the node count from 2^n to n+1. Without that, a 100-step tree would have more terminal nodes than there are atoms in the observable universe.",
+    example: {
+      prompt: "When is it optimal to exercise an American option early?",
+      working: [
+        "For a call on a non-dividend stock: never. Exercising pays the strike sooner and surrenders remaining time value, gaining nothing.",
+        "With dividends: possibly, to capture a payment the option holder does not receive.",
+        "For a put: often. Exercising hands you the strike in cash now, which then earns interest.",
+        "The deeper in the money and the higher the interest rate, the more attractive it becomes.",
+      ],
+      answer:
+        "Almost never for calls without dividends — the American and European prices are identical. Frequently for deep in-the-money puts, especially when rates are high.",
+    },
+    whyItMatters:
+      "Most traded equity options are American. The tree is also the clearest demonstration of risk-neutral pricing, because the replication argument is visible at a single node rather than buried in a derivation.",
+    demo: { labSlug: "binomial", label: "Price American options and watch convergence" },
+    prerequisites: ["black-scholes"],
+  },
+  {
+    slug: "bond-pricing",
+    module: 13,
+    title: "Bond pricing and yield",
+    definition:
+      "The price of a bond is the present value of its contractual cash flows; the yield to maturity is the single discount rate that reproduces an observed price.",
+    intuition:
+      "There is no randomness here at all — the coupons and principal are fixed by contract. The entire problem is discounting, which makes fixed income an exercise in calculus rather than probability. The risk is that the discount rate moves.",
+    formula: "P = \\sum_t \\frac{C_t}{(1 + y/f)^{ft}}",
+    formulaNote:
+      "The bond-market convention compounds f times per year, not continuously. Using e^{-yt} instead gives a slightly different price for the same quoted yield, which is a classic source of disagreement between a model and a trading system.",
+    example: {
+      prompt: "A 10-year bond pays a 5% coupon semi-annually. What is it worth at a 5% yield?",
+      working: [
+        "Each coupon is exactly the interest the discount rate demands on the outstanding principal.",
+        "So nothing accrues or erodes over the bond's life.",
+        "The price is therefore exactly the face value.",
+        "Price = 100.000000, with no approximation.",
+      ],
+      answer:
+        "Exactly par. This identity is the sharpest available check on a pricing implementation — any error in the compounding convention breaks it immediately.",
+    },
+    whyItMatters:
+      "Fixed income is a large share of quantitative finance, and the mathematics is different in character from equity work. It also underpins discounting everywhere else, including the risk-free rate in every option formula.",
+    demo: { labSlug: "fixed-income", label: "Price bonds and check the par identity" },
+    prerequisites: ["expected-value"],
+  },
+  {
+    slug: "duration-and-convexity",
+    module: 13,
+    title: "Duration and convexity",
+    definition:
+      "The first and second derivatives of a bond's price with respect to its yield, expressed in interpretable units.",
+    intuition:
+      "Macaulay duration is the present-value-weighted average time to receive the cash flows — literally the balance point of the cash flows on a time axis. Modified duration rescales it into a price sensitivity. Convexity is the curvature the straight-line estimate misses.",
+    formula: "\\frac{\\Delta P}{P} \\approx -D_{\\text{mod}}\\,\\Delta y + \\tfrac{1}{2} C (\\Delta y)^2",
+    formulaNote:
+      "The duration-only estimate is a tangent line to a convex curve, so it UNDERSTATES the price for a yield move in either direction. That is why positive convexity is a property a bondholder wants, not merely a correction term.",
+    example: {
+      prompt: "A bond has modified duration 7 and convexity 80. Rates rise 1%. What happens?",
+      working: [
+        "Duration term: -7 x 0.01 = -7.00%.",
+        "Convexity term: 0.5 x 80 x 0.01^2 = +0.40%.",
+        "Combined estimate: -6.60%.",
+        "Duration alone would have overstated the loss by 0.4%.",
+      ],
+      answer:
+        "About a 6.6% fall, not 7%. Convexity works in the holder's favour in both directions — it softens losses and amplifies gains.",
+    },
+    whyItMatters:
+      "Duration is how interest-rate risk is measured and hedged across the entire fixed income market. DV01, the dollar value of a basis point, is the unit traders actually transact in.",
+    demo: { labSlug: "fixed-income", label: "See the duration tangent against the true curve" },
+    prerequisites: ["bond-pricing"],
+  },
+  {
+    slug: "yield-curves",
+    module: 13,
+    title: "Yield curves and forward rates",
+    definition:
+      "The relationship between interest rates and maturity, and the future rates implied by it under no-arbitrage.",
+    intuition:
+      "There is not one interest rate but a whole curve of them. Its shape carries information, and the forward rates implied by it are the rates that make two investment routes equivalent — not a forecast of where rates will go.",
+    formula: "(1 + y_2)^{t_2} = (1 + y_1)^{t_1}(1 + f)^{t_2 - t_1}",
+    formulaNote:
+      "This is pure no-arbitrage: investing long must equal investing short and rolling into the forward, or there is a riskless profit. The forward rate follows from today's prices alone.",
+    example: {
+      prompt: "The 1-year rate is 3% and the 2-year rate is 4%. Does the market expect rates to rise?",
+      working: [
+        "The implied 1-year forward rate one year out: (1.04^2 / 1.03) - 1 = 5.01%.",
+        "That is above today's 1-year rate of 3%.",
+        "But this follows from arithmetic, not from a forecast.",
+        "An upward-sloping curve can exist purely because investors demand a premium for lending longer.",
+      ],
+      answer:
+        "Not necessarily. The forward rate is 5.01%, but that is implied by today's prices rather than predicted. Treating forwards as forecasts is the most common misreading in fixed income.",
+    },
+    whyItMatters:
+      "Every cash flow in finance is discounted off a curve, not a single rate. The curve's shape also happens to be almost entirely described by three numbers, which is the result the PCA lab demonstrates.",
+    demo: { labSlug: "fixed-income", label: "Build curves and compute forward rates" },
+    prerequisites: ["bond-pricing"],
+  },
+  {
+    slug: "credit-risk",
+    module: 13,
+    title: "Credit risk",
+    definition:
+      "The risk that a borrower fails to pay, and the framework that prices it by treating a company's equity as an option on its own assets.",
+    intuition:
+      "Shareholders with limited liability receive max(V - D, 0) at maturity: if the firm is worth more than its debt they repay and keep the rest, otherwise they walk away. That is a call payoff struck at the face value of the debt — so Black-Scholes prices the equity, and the debt is whatever remains.",
+    formula: "E_0 = V_0 N(d_1) - D e^{-rT} N(d_2), \\qquad P(\\text{default}) = N(-d_2)",
+    formulaNote:
+      "The risk-neutral default probability prices the debt; the real-world probability uses the firm's true expected growth and is systematically lower. Quoting one as the other is a standard error, and spreads always imply more defaults than are observed.",
+    example: {
+      prompt: "Why do shareholders benefit from the firm taking more risk, while creditors do not?",
+      working: [
+        "Equity is a call option on the firm's assets.",
+        "Option value rises with volatility, because downside is capped at zero.",
+        "The firm's total value splits between equity and debt.",
+        "So whatever volatility adds to the equity must come out of the debt.",
+      ],
+      answer:
+        "Limited liability caps shareholder losses but not their gains, making risk valuable to them. Creditors have capped upside and real downside, so the same risk is pure cost. This conflict is structural, not a matter of bad behaviour.",
+    },
+    whyItMatters:
+      "Credit is a large part of fixed income and the mathematics is genuinely different from rates. The Merton framework also underpins distance to default, which remains one of the most widely used credit ranking measures.",
+    demo: { labSlug: "credit", label: "Price a firm's equity and debt" },
+    prerequisites: ["black-scholes", "bond-pricing"],
   },
 ];
 
