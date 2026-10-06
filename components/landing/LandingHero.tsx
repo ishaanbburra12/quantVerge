@@ -33,25 +33,36 @@ const BEATS: readonly Beat[] = [
     accentTitle: "VERGE",
     body: "Experiment with the mathematics behind markets. Every number on this site is computed in your browser, from a seed you control.",
     enter: 0,
-    exit: 0.24,
+    exit: 0.22,
   },
   {
     eyebrow: "Sixteen laboratories",
     title: "Interactive Labs",
     body: "Monte Carlo, regime switching, portfolio optimisation, options, fixed income, credit. Each one states its assumptions before its results, and its limitations after them.",
-    enter: 0.33,
-    exit: 0.58,
+    enter: 0.36,
+    exit: 0.62,
   },
   {
     eyebrow: "Written from scratch",
     title: "Math Library",
     body: "Hart's normal CDF, cyclic Jacobi eigendecomposition, Nelder-Mead, GARCH by maximum likelihood. No numerical dependencies, and a test suite that checks the mathematics rather than the output.",
-    enter: 0.68,
+    enter: 0.78,
     exit: null,
   },
 ];
 
-const RUNWAY_VH = 360;
+/**
+ * How much scroll the pinned stage consumes, as a percentage of viewport
+ * height. Of this, the first 100vh is the stage itself, so the scrubbed range
+ * is RUNWAY_VH - 100.
+ *
+ * The number is set by the last beat rather than by taste. "Math Library"
+ * finishes arriving at timeline position 0.88, which leaves 12% of the range
+ * afterwards — and that remainder is not dead, because the camera is still
+ * interpolating toward its final keyframe through it. Any longer and the stage
+ * holds you on text that has stopped moving while the page below waits.
+ */
+const RUNWAY_VH = 290;
 
 export function LandingHero(): React.ReactElement {
   const capabilities = useCapabilities();
