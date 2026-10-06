@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HeroVisualisation } from "@/components/home/HeroVisualisation";
+import { LandingHero } from "@/components/landing";
 import { LabCard } from "@/components/LabCard";
 import { LABS } from "@/content/labs";
 import { Section } from "@/components/PageHeader";
@@ -29,57 +29,7 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ---------- Hero ---------- */}
-      <div className="relative overflow-hidden border-b border-line">
-        <div aria-hidden="true" className="grid-paper absolute inset-0 opacity-[0.35]" />
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent"
-        />
-        <div className="relative mx-auto max-w-content px-4 py-14 sm:px-6 sm:py-20">
-          <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-            <div className="animate-fade-up">
-              <p className="text-2xs font-semibold uppercase tracking-[0.2em] text-accent">
-                Quantitative research laboratory
-              </p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-[-0.02em] text-ink sm:text-5xl">
-                QUANT<span className="text-accent">VERGE</span>
-              </h1>
-              <p className="mt-4 text-lg font-medium leading-snug text-ink sm:text-xl">
-                Experiment with the mathematics behind markets.
-              </p>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-muted">
-                An interactive laboratory for probability, statistics, portfolio theory, market simulation,
-                risk, and quantitative research.
-              </p>
-
-              <div className="mt-7 flex flex-wrap gap-2.5">
-                <Link
-                  href="/labs"
-                  className="rounded-md border border-accent bg-accent px-4 py-2 text-sm font-medium text-accent-ink transition-all hover:brightness-110"
-                >
-                  Explore Labs
-                </Link>
-                <Link
-                  href="/research"
-                  className="rounded-md border border-line bg-surface-raised px-4 py-2 text-sm font-medium text-ink transition-colors hover:border-line-strong"
-                >
-                  View Research
-                </Link>
-              </div>
-
-              <p className="mt-7 max-w-md border-l-2 border-line pl-3 text-xs leading-relaxed text-ink-faint">
-                Instead of asking which stock will go up, QuantVerge asks how mathematical models behave, what
-                assumptions they depend on, and when those assumptions break.
-              </p>
-            </div>
-
-            <div className="animate-fade-up [animation-delay:120ms]">
-              <HeroVisualisation />
-            </div>
-          </div>
-        </div>
-      </div>
+      <LandingHero />
 
       {/* ---------- What this is / is not ---------- */}
       <Section>
@@ -87,7 +37,7 @@ export default function HomePage() {
           {[
             {
               title: "Everything is computed",
-              body: "No hard-coded results. Every statistic on this site is calculated in your browser from the parameters you choose, by functions covered by a test suite of 349 numerical tests.",
+              body: "No hard-coded results. Every statistic on this site is calculated in your browser from the parameters you choose, by functions covered by a test suite of 457 numerical tests.",
             },
             {
               title: "Everything is reproducible",

@@ -212,3 +212,55 @@ input[type="range"]:disabled {
 .recharts-surface:focus {
   outline: none;
 }
+
+/* ---------------------------------------------------------------------------
+   Landing hero
+   The gradient that stands in for the 3D canvas while the three.js chunk
+   downloads, and again underneath it afterwards, so a WebGL failure degrades to
+   something deliberate rather than to a black rectangle. It does not follow the
+   light/dark theme: the scene itself is always near-black.
+   -------------------------------------------------------------------------- */
+.landing-fallback {
+  background:
+    radial-gradient(120% 90% at 50% 108%, rgba(56, 214, 240, 0.22) 0%, transparent 62%),
+    radial-gradient(70% 60% at 18% 12%, rgba(56, 214, 240, 0.07) 0%, transparent 70%),
+    linear-gradient(180deg, #05070b 0%, #070c14 55%, #05070b 100%);
+}
+
+/* The hero scrim.
+   Two jobs that pull in opposite directions: the copy needs a dark backing, and
+   the surface needs to stay visible. They are separated by axis. On a phone the
+   copy sits high in frame and the grid low, so the scrim is top-weighted and
+   releases completely by two thirds down. From the small breakpoint up the copy
+   moves to the left of a centred row, so the scrim turns horizontal and the
+   right of the mesh is left alone. A single bottom-to-opaque gradient, which is
+   the obvious thing to write, covers the grid entirely in portrait. */
+.landing-scrim {
+  background: linear-gradient(
+    to bottom,
+    rgba(5, 7, 11, 0.92) 0%,
+    rgba(5, 7, 11, 0.78) 44%,
+    rgba(5, 7, 11, 0.2) 64%,
+    rgba(5, 7, 11, 0) 76%,
+    rgba(5, 7, 11, 0.88) 100%
+  );
+}
+
+@media (min-width: 640px) {
+  .landing-scrim {
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(5, 7, 11, 0.8) 0%,
+        rgba(5, 7, 11, 0) 20%,
+        rgba(5, 7, 11, 0) 88%,
+        rgba(5, 7, 11, 0.9) 100%
+      ),
+      linear-gradient(
+        to right,
+        rgba(5, 7, 11, 0.86) 0%,
+        rgba(5, 7, 11, 0.45) 48%,
+        rgba(5, 7, 11, 0) 80%
+      );
+  }
+}
