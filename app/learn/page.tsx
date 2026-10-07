@@ -6,7 +6,7 @@ import { Card, CardBody, Badge } from "@/components/ui";
 export const metadata = {
   title: "Learn",
   description:
-    "Ten modules in dependency order, from probability and returns through to reinforcement learning. Every lesson has a definition, the intuition, the formula, a worked example and an interactive demonstration.",
+    "Thirteen modules. The first ten are a dependency chain from probability and returns through to reinforcement learning; the last three are self-contained. Every lesson has a definition, the intuition, the formula, a worked example and an interactive demonstration.",
 };
 
 export default function LearnPage() {
@@ -14,8 +14,8 @@ export default function LearnPage() {
     <>
       <PageHeader
         eyebrow="Learn"
-        title="Ten modules, in dependency order"
-        description="Each module assumes only what came before it. The sequence deliberately puts reinforcement learning last, because it depends on everything else — probability, simulation, time series, backtesting and generalisation. Working through them out of order is possible but harder."
+        title="Thirteen modules, in dependency order"
+        description="Modules 1 to 10 are a chain: each assumes only what came before, and reinforcement learning sits at the end because it depends on all of it — probability, simulation, time series, backtesting and generalisation. Modules 11 to 13 are not part of that chain. They are self-contained tracks the labs needed, and apart from assuming the first few modules they can be read whenever you want them."
         meta={
           <>
             <Badge tone="neutral">{LESSONS.length} lessons</Badge>

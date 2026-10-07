@@ -3,7 +3,9 @@
  *
  * Lessons are ordered by dependency, not by difficulty rating: each one assumes
  * only what came before it. The ordering follows the ten-module sequence, which
- * deliberately puts reinforcement learning last — it depends on everything else.
+ * deliberately puts reinforcement learning at the end of the chain — it depends on
+ * everything else. Modules 11 to 13 are outside that chain: they are self-contained
+ * tracks the labs required, not later steps in the sequence.
  */
 
 export interface Lesson {

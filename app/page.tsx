@@ -100,13 +100,13 @@ export default function HomePage() {
             <CardBody className="flex h-full flex-col">
               <p className="text-2xs font-semibold uppercase tracking-[0.16em] text-accent">Learn</p>
               <h3 className="mt-2 text-lg font-semibold tracking-tight text-ink">
-                Ten modules, in dependency order
+                Thirteen modules, in dependency order
               </h3>
               <p className="mt-2 flex-1 text-xs leading-relaxed text-ink-muted">
-                Probability and returns, then Monte Carlo, then correlation, then portfolio mathematics, then
-                time series, regimes, backtesting, overfitting, machine learning, and only then reinforcement
-                learning. Each lesson has a definition, the intuition, the formula, a worked example, an
-                interactive demonstration, and an honest note on why it matters.
+                Probability and returns, then Monte Carlo, correlation, portfolio mathematics, time series,
+                regimes, backtesting, overfitting, machine learning, and only then reinforcement learning,
+                which depends on all of it. Three further modules — statistical inference, derivatives, and
+                fixed income and credit — sit outside that chain and can be read whenever you need them.
               </p>
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1">
                 <Link href="/learn" className="text-xs font-medium text-accent hover:underline">

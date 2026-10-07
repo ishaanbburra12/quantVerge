@@ -84,7 +84,7 @@ failed or needed revision. Failed experiments stay visible.
 
 ### Learn, research and reference
 
-- **42 lessons** across **13 modules** in dependency order, each with a definition, intuition,
+- **40 lessons** across **13 modules** in dependency order, each with a definition, intuition,
   formula, worked example, and a link to the lab that demonstrates it.
 - **13 code walkthroughs** — one per module — covering what the code does, why the mathematics
   works, every variable, the failure modes that return a plausible wrong answer rather than an
@@ -295,7 +295,7 @@ understated rather than overstated.
 
 ## Roadmap
 
-**Done** — design system, navigation, all sixteen labs, 42 lessons, 13 code walkthroughs, glossary,
+**Done** — design system, navigation, all sixteen labs, 40 lessons, 13 code walkthroughs, glossary,
 challenges, research framework, experiment log, journal, Research Mode, reproducibility layer,
 sitemap and robots, WCAG AA contrast throughout, the 3D landing hero, 457 tests.
 
