@@ -932,6 +932,402 @@ export const TEACHING_NOTES: TeachingNote[] = [
       "You run 45 experimental cells and one shows excellent robustness. What must you report alongside it, and why?",
     ],
   },
+  /* ---------------------------------------------------------------- */
+  {
+    module: 11,
+    title: "Statistical inference",
+    feature: "The hypothesis-testing layer",
+    files: [
+      { path: "lib/statistics/inference.ts", role: "t-distribution, t-tests, power, multiple-testing corrections" },
+      { path: "lib/math/distributions.ts", role: "logGamma, used by the incomplete beta function" },
+      { path: "lib/finance/performance.ts", role: "sharpeRatio, the statistic being tested" },
+    ],
+    whatTheCodeDoes:
+      "incompleteBeta(x, a, b) evaluates the regularised incomplete beta function by Lentz's continued-fraction algorithm. studentTCDF builds the t-distribution CDF on top of it, and studentTInverse inverts that by bisection. oneSampleTTest divides the deviation of the sample mean from the null by the STANDARD ERROR, not the standard deviation, and converts the result to a p-value. power() and requiredSampleSize() answer the question nobody asks before running the test. bonferroni and benjaminiHochberg adjust for having asked many questions at once. sharpeStandardError(S, n) gives the sampling noise in an estimated Sharpe ratio.",
+    mathematics: {
+      intro:
+        "Four separate pieces: the t-statistic, the distribution it follows, the power calculation, and the two multiple-testing corrections — which solve different problems and are not interchangeable.",
+      equations: [
+        {
+          label: "One-sample t-statistic",
+          latex: "t = \\frac{\\bar{x} - \\mu_0}{s/\\sqrt{n}}, \\qquad \\nu = n - 1",
+          note: "The denominator is the standard error of the MEAN. Using s instead makes every p-value wrong by a factor involving sqrt(n).",
+        },
+        {
+          label: "Student-t CDF via the incomplete beta",
+          latex: "F_\\nu(t) = 1 - \\tfrac{1}{2} I_{x}\\!\\left(\\tfrac{\\nu}{2}, \\tfrac{1}{2}\\right), \\quad x = \\frac{\\nu}{\\nu + t^2}",
+          note: "For t > 0. The identity is what lets one continued fraction serve the whole distribution.",
+        },
+        {
+          label: "Power",
+          latex: "1 - \\beta = \\Phi(\\delta - z_{1-\\alpha/2}) + \\Phi(-\\delta - z_{1-\\alpha/2}), \\quad \\delta = \\frac{\\text{effect}}{\\text{SE}}",
+          note: "The probability of detecting an effect that is genuinely there.",
+        },
+        {
+          label: "Standard error of a Sharpe ratio",
+          latex: "\\mathrm{SE}(\\hat{S}) \\approx \\sqrt{\\frac{1 + \\tfrac{1}{2}S^2}{n}}",
+          note: "n is the number of YEARS. This is the formula that makes most published backtest Sharpes uninterpretable.",
+        },
+      ],
+    },
+    whyItWorks: [
+      {
+        heading: "Why the t-distribution and not the normal",
+        body: "If you knew the true standard deviation, the standardised sample mean would be exactly normal. You do not — you estimated it from the same data, and that estimate is itself noisy. Dividing by a random quantity that is sometimes too small produces occasional large statistics, so the distribution has heavier tails than the normal. As n grows the estimate stabilises and the t-distribution converges to the normal, which is why the correction stops mattering past a few hundred observations and matters enormously at twenty.",
+      },
+      {
+        heading: "Why the continued fraction",
+        body: "The incomplete beta function has a power-series representation that converges, but slowly and with catastrophic cancellation near the middle of its range. Lentz's method evaluates the continued fraction from the front rather than the back, so it can stop as soon as successive terms stop changing the result, and it never forms the differences that cancel. The code also uses the symmetry I_x(a,b) = 1 - I_{1-x}(b,a) to stay in the half of the domain where convergence is fast.",
+      },
+      {
+        heading: "Why Bonferroni and Benjamini-Hochberg are not alternatives",
+        body: "They control different things. Bonferroni controls the probability of making even one false rejection across the whole family — appropriate when a single false positive is expensive. Benjamini-Hochberg controls the expected PROPORTION of rejections that are false — appropriate when you are screening and will follow up on whatever survives. Bonferroni is far more conservative, and on a large family it will reject nothing at all, which is a failure mode rather than a safe default.",
+      },
+      {
+        heading: "Why power is the question that should come first",
+        body: "A test that returns 'not significant' has two possible explanations: there is no effect, or there is one and your sample could never have found it. Only a power calculation distinguishes them, and it has to be done before the data, because afterwards the observed effect contaminates it. In finance the arithmetic is brutal — detecting a Sharpe of 0.5 at 80% power takes roughly 30 years of data, which is longer than most strategies, most funds, and most careers.",
+      },
+    ],
+    variables: [
+      { symbol: "\\bar{x}", meaning: "Sample mean of the observations." },
+      { symbol: "\\mu_0", meaning: "The null value — usually zero, meaning 'no edge'." },
+      { symbol: "s", meaning: "Sample standard deviation, with Bessel's correction." },
+      { symbol: "\\nu", meaning: "Degrees of freedom, n − 1 for the one-sample test." },
+      { symbol: "\\alpha", meaning: "Significance level: the false-positive rate you accept per test." },
+      { symbol: "\\delta", meaning: "Effect size measured in standard errors." },
+      { symbol: "S", meaning: "Estimated Sharpe ratio, annualised." },
+    ],
+    assumptions: [
+      "Observations are independent. Returns are not, so the effective sample size is smaller than the count.",
+      "The sampling distribution of the mean is approximately normal — safe for large n by the central limit theorem, questionable for small n with heavy tails.",
+      "The Sharpe standard error formula assumes returns are IID and normal. Both fail for real returns, and the formula understates the true noise when they do.",
+      "The hypothesis was fixed before the data were seen.",
+    ],
+    limitations: [
+      "A p-value is the probability of data this extreme IF the null is true. It is not the probability the null is true, and it is not the probability the result will replicate.",
+      "Benjamini-Hochberg as implemented assumes the tests are independent or positively dependent. Arbitrary dependence needs the more conservative BY variant.",
+      "Nothing here can rescue an analysis where the hypothesis was chosen after looking at the data. The correction counts the tests you declare, not the ones you ran.",
+      "Significance says nothing about size. With enough data, an economically meaningless effect becomes significant.",
+    ],
+    failureModes: [
+      {
+        title: "Dividing by s instead of s/sqrt(n)",
+        body: "The single most common error in applied statistics. It produces a t-statistic smaller by a factor of sqrt(n) and a p-value that looks reassuringly unremarkable. Nothing errors; the test simply loses all its power.",
+      },
+      {
+        title: "Counting tests as one",
+        body: "Scanning 200 parameter combinations and reporting the best as p = 0.01 is not a 1% false-positive rate. familyWiseErrorRate(200) returns 0.99997 — under the null you are essentially certain to find something.",
+      },
+      {
+        title: "Treating n as observations rather than years",
+        body: "sharpeStandardError takes years. Passing 2,520 daily observations instead of 10 years returns a standard error roughly 16 times too small, turning noise into an apparently decisive result.",
+      },
+      {
+        title: "Interpreting a null result as evidence of absence",
+        body: "Without a power calculation, 'not significant' and 'we could not have detected it' are indistinguishable, and in finance the second is usually the true explanation.",
+      },
+      {
+        title: "Silent precision loss near t = 0",
+        body: "The identity x = nu/(nu + t^2) rounds to exactly 1.0 in float64 for |t| below about 1e-8, which flattened the CDF into a step. The code special-cases small |t| with a first-order expansion around the density at zero. This returned a plausible 0.5 rather than an error, which is why it survived until a test checked the derivative.",
+      },
+    ],
+    beforeMovingOn:
+      "That a p-value answers a narrower question than people want it to, and that the number of hypotheses you tested is part of the result rather than a detail of how you got there. The Overfitting Lab is the same lesson arrived at empirically: across a grid of strategies on data containing no signal at all, the correlation between in-sample and out-of-sample Sharpe comes out at −0.005.",
+    questions: [
+      {
+        question: "Your backtest has a Sharpe of 1.2 over three years. Is it significant?",
+        answer:
+          "Compute the standard error: sqrt((1 + 0.5 × 1.2²)/3) ≈ 0.76. The t-statistic is 1.2/0.76 ≈ 1.59, which does not clear the usual two-sided threshold. So no — and the more important point is that three years was never enough data to answer the question either way. The 95% interval runs from −0.28 to 2.68, which includes 'this strategy loses money'.",
+      },
+      {
+        question: "Why does Benjamini-Hochberg reject more hypotheses than Bonferroni?",
+        answer:
+          "Because it controls a weaker, more useful quantity. Bonferroni holds the probability of ANY false rejection below alpha, so its threshold shrinks as alpha/m and becomes vanishing on a large family. Benjamini-Hochberg holds the expected fraction of its rejections that are false below alpha, comparing the i-th smallest p-value against (i/m)·alpha — a threshold that relaxes as evidence accumulates across the family. If you are screening candidates for further testing, tolerating a known fraction of false leads is correct; if one false positive would be published as fact, it is not.",
+      },
+      {
+        question: "You tested 50 strategies and the best has p = 0.008. What can you say?",
+        answer:
+          "Almost nothing, until the 50 is accounted for. Under the null, the chance of at least one p-value below 0.05 across 50 independent tests is 1 − 0.95⁵⁰ ≈ 92%, so finding something was close to guaranteed. The Bonferroni threshold is 0.001, which 0.008 does not clear. The honest statement is that you ran 50 tests, the best was p = 0.008, and that is consistent with pure chance. The result is a hypothesis to be tested on data you have not touched — not a finding.",
+      },
+    ],
+    quiz: [
+      "A colleague reports a t-statistic computed by dividing the mean return by the standard deviation of returns. By what factor is it wrong, and in which direction?",
+      "Compute the family-wise error rate for 20 independent tests at alpha = 0.05, and state what it means in words.",
+      "Why does the Sharpe ratio standard error depend on the Sharpe ratio itself?",
+      "You need to detect a Sharpe of 0.4 at 80% power. Roughly how many years of data does that require, and what does the answer imply about short backtests?",
+      "Explain why a power calculation performed after seeing the data is not a power calculation.",
+    ],
+  },
+  /* ---------------------------------------------------------------- */
+  {
+    module: 12,
+    title: "Derivatives",
+    feature: "The option pricing layer",
+    files: [
+      { path: "lib/finance/blackScholes.ts", role: "Closed-form European prices, Greeks, parity, implied volatility" },
+      { path: "lib/finance/binomialTree.ts", role: "Cox-Ross-Rubinstein lattice, American exercise, convergence" },
+      { path: "lib/math/distributions.ts", role: "normalCDF (Hart) and normalPDF, which the Greeks are built from" },
+    ],
+    whatTheCodeDoes:
+      "blackScholesD computes d1 and d2 once; blackScholes uses them for the price and all five Greeks analytically rather than by finite difference. putCallParityResidual checks an identity that must hold to machine precision. impliedVolatility inverts the price by BISECTION, not Newton. binomialPrice builds a recombining CRR tree, rolls backwards taking max(hold, exercise) at every node when american is true, and refuses to return a number when the risk-neutral probability leaves [0,1]. convergenceProfile prices the same option at increasing step counts so the oscillation toward the closed form is visible.",
+    mathematics: {
+      intro:
+        "One formula, one lattice, and the identity that ties both to no-arbitrage.",
+      equations: [
+        {
+          label: "Black-Scholes-Merton",
+          latex: "C = S e^{-qT}\\Phi(d_1) - K e^{-rT}\\Phi(d_2)",
+          note: "Phi is the standard normal CDF. The two terms are the discounted expected stock received and cash paid, each under the measure that makes its own numeraire natural.",
+        },
+        {
+          label: "The d terms",
+          latex: "d_1 = \\frac{\\ln(S/K) + (r - q + \\tfrac{1}{2}\\sigma^2)T}{\\sigma\\sqrt{T}}, \\qquad d_2 = d_1 - \\sigma\\sqrt{T}",
+          note: "Phi(d2) is the risk-neutral probability the call finishes in the money. Phi(d1) is not a probability.",
+        },
+        {
+          label: "Put-call parity",
+          latex: "C - P = S e^{-qT} - K e^{-rT}",
+          note: "Model-free. It follows from no-arbitrage alone, so any pricer that violates it is wrong regardless of its assumptions.",
+        },
+        {
+          label: "CRR parameters",
+          latex: "u = e^{\\sigma\\sqrt{\\Delta t}}, \\quad d = 1/u, \\quad p = \\frac{e^{(r-q)\\Delta t} - d}{u - d}",
+          note: "u·d = 1 exactly, which is what makes the tree recombine and the node count O(n²) instead of O(2ⁿ).",
+        },
+      ],
+    },
+    whyItWorks: [
+      {
+        heading: "Why the real drift is absent",
+        body: "Nowhere in the formula does the stock's expected return appear. The reason is that the option can be replicated by continuously holding Delta shares and borrowing the rest, and the cost of running that replicating portfolio does not depend on which way you think the stock is going — only on how much it moves. If the option traded away from that cost, you could run the hedge and bank the difference. So the price is pinned by the hedging argument, and the drift is replaced by r.",
+      },
+      {
+        heading: "Why the Greeks are computed analytically",
+        body: "Differentiating the formula by hand gives exact derivatives. Finite differences would introduce a step-size tradeoff with no good answer: too large and you measure curvature instead of slope, too small and you subtract two nearly equal numbers and amplify floating-point error. The analytic route also exposed a real bug — the original normal CDF was accurate to only 1.5e-8, which is invisible in a price and became a 3.2e-6 error in the Greeks.",
+      },
+      {
+        heading: "Why bisection for implied volatility",
+        body: "Newton's method converges faster and is the obvious choice, and it fails exactly where it matters. The update divides by Vega, and Vega goes to zero for options deep in or deep out of the money — precisely the strikes whose implied volatilities define the wings of the smile. Dividing by a near-zero derivative throws the iterate anywhere. Bisection only needs the price to be monotone in volatility, which it always is, so it is slower and it always converges.",
+      },
+      {
+        heading: "Why the tree can price what the formula cannot",
+        body: "Black-Scholes assumes exercise happens at expiry. An American option can be exercised at any time, so its value is the solution to an optimal stopping problem rather than an expectation. The lattice solves that directly: rolling backwards, each node takes max(value of holding, value of exercising now), and the decision propagates. There is no closed form for an American put, which is why the tree exists rather than being a teaching device.",
+      },
+      {
+        heading: "Why an American call on a non-dividend stock is never exercised early",
+        body: "Exercising surrenders the remaining time value and pays the strike earlier than necessary. With no dividend there is nothing to gain by owning the stock sooner, so holding dominates at every node and the tree returns exactly the European price. Introduce a dividend large enough and the comparison flips — which is visible in the lab by raising the dividend yield and watching earliestExerciseTime stop being null.",
+      },
+    ],
+    variables: [
+      { symbol: "S", meaning: "Spot price of the underlying today." },
+      { symbol: "K", meaning: "Strike — the price at which the option may be exercised." },
+      { symbol: "T", meaning: "Time to expiry in years." },
+      { symbol: "r", meaning: "Continuously compounded risk-free rate." },
+      { symbol: "q", meaning: "Continuous dividend yield." },
+      { symbol: "\\sigma", meaning: "Volatility — the only input not directly observable, which is why implied volatility exists." },
+      { symbol: "\\Delta", meaning: "Delta: shares of stock in the replicating portfolio. Also the hedge ratio." },
+      { symbol: "\\Gamma", meaning: "Gamma: how fast Delta changes, so how often the hedge must be rebalanced." },
+      { symbol: "p", meaning: "Risk-neutral up probability on the tree. Not the real-world probability." },
+    ],
+    assumptions: [
+      "Geometric Brownian motion: continuous paths, constant volatility, lognormal terminal prices.",
+      "Continuous, costless trading — the replication argument needs it, and it is the assumption that fails first.",
+      "A single constant volatility across all strikes. The observed smile is direct evidence this is false.",
+      "No early exercise, for the closed form. The tree drops exactly this one.",
+      "A constant known risk-free rate, and borrowing and lending at the same rate.",
+    ],
+    limitations: [
+      "Constant volatility is wrong in a way that matters: real option markets price a smile, which is the market saying returns have fatter tails than lognormal.",
+      "Continuous paths rule out jumps, so the model systematically underprices far out-of-the-money options.",
+      "Transaction costs make continuous rebalancing infinitely expensive; real hedging is discrete and imperfect, and the error that introduces is not in the model.",
+      "The binomial price oscillates around the true value as steps increase rather than approaching it monotonically, because the strike's position relative to the terminal nodes shifts with the step count.",
+      "Greeks are derivatives of a model. If the model is wrong, the hedge ratios it gives you are wrong in the same direction.",
+    ],
+    failureModes: [
+      {
+        title: "Newton's method on deep out-of-the-money implied volatility",
+        body: "Vega collapses toward zero, the Newton step divides by it, and the iterate diverges or lands on a nonsensical volatility. The failure is silent if the loop reports its last iterate. This is why the code bisects.",
+      },
+      {
+        title: "A time step too coarse for the volatility",
+        body: "If exp((r−q)Δt) falls outside [d, u], the risk-neutral probability leaves [0,1] and the lattice admits arbitrage. The code throws with the reason rather than returning a price computed from a negative probability, which would look perfectly ordinary.",
+      },
+      {
+        title: "Reading Phi(d1) as a probability",
+        body: "Phi(d2) is the risk-neutral probability of finishing in the money. Phi(d1) is the same probability under a different measure, scaled — it is the Delta, not a probability of anything in the real world. Treating it as one overstates the chance of exercise.",
+      },
+      {
+        title: "Mixing units of time",
+        body: "T in days with sigma annualised, or r quoted annually but applied per period, produces a price that is wrong by a large factor while remaining positive and bounded by the parity limits. Nothing catches it except parity residual or a sanity check against the tree.",
+      },
+      {
+        title: "Insufficient Monte Carlo paths with no error bar",
+        body: "monteCarloOptionPrice returns a standard error alongside the price precisely so the result cannot be read as exact. Antithetic variates cut that error by pairing each normal draw with its negation, which cancels the sampling noise in the drift.",
+      },
+    ],
+    beforeMovingOn:
+      "That the formula is a statement about replication cost, not a forecast — and that the smile is the market's own evidence against the assumption the formula is built on. Both pricers in here agree to six decimal places on a European option, and the tree's extra value on an American put is the price of the right to exercise early, which no closed form will give you.",
+    questions: [
+      {
+        question: "Why does the expected return of the stock not appear in the price?",
+        answer:
+          "Because the option is replicated by a self-financing portfolio of stock and cash, and the cost of that portfolio depends on how far the stock moves, not on where it is drifting. If two people disagree about the expected return but agree about volatility, they still agree about the replication cost — and if the option traded away from it, either of them could arbitrage it. So the drift is replaced by the risk-free rate, which is not a claim that investors are risk-neutral but a consequence of the hedge existing.",
+      },
+      {
+        question: "Why bisect for implied volatility rather than use Newton?",
+        answer:
+          "Newton divides by Vega, and Vega vanishes for deep in- and out-of-the-money options. Those are exactly the strikes you most want implied volatilities for, because they define the wings of the smile. Bisection needs only monotonicity of price in volatility, which holds everywhere, so it converges on every input at the cost of more iterations. Robustness beats speed when the fast method fails precisely on the interesting cases.",
+      },
+      {
+        question: "What does the existence of the volatility smile tell you?",
+        answer:
+          "That the market does not believe the model it is quoting in. If Black-Scholes were right, one volatility would price every strike and the implied surface would be flat. Instead out-of-the-money puts imply higher volatilities, which is the market paying up for protection against moves the lognormal assumption says are essentially impossible. The smile is the model's error made visible and quoted, and 'implied volatility' is best read as the number that makes a known-wrong formula produce the right price.",
+      },
+    ],
+    quiz: [
+      "An American call on a stock paying no dividend is worth exactly the European call. Explain why, in terms of what exercising early gives up.",
+      "You price a put and a call on the same underlying and strike, and the parity residual is 0.4. Which of your two prices is wrong, and how would you find out?",
+      "Gamma peaks near the money and close to expiry. What does that imply for someone running a delta hedge on an option about to expire at the strike?",
+      "Doubling the steps in a binomial tree does not halve the pricing error, and the error changes sign. Explain the oscillation.",
+      "Vega goes to zero for a deep out-of-the-money option. State the consequence for implied volatility, and the consequence for anyone trading that option on a volatility view.",
+    ],
+  },
+  /* ---------------------------------------------------------------- */
+  {
+    module: 13,
+    title: "Fixed income and credit",
+    feature: "The discounting and default layer",
+    files: [
+      { path: "lib/finance/fixedIncome.ts", role: "Cash flows, pricing, yield, duration, convexity, curves, forwards" },
+      { path: "lib/finance/credit.ts", role: "Merton structural model, spreads, implied asset volatility" },
+      { path: "lib/finance/blackScholes.ts", role: "Reused directly — the Merton model is Black-Scholes on the firm" },
+    ],
+    whatTheCodeDoes:
+      "bondCashFlows counts BACKWARDS from maturity so the final payment lands exactly on the maturity date rather than accumulating rounding across sixty coupons. presentValue discounts at the periodic rate; yieldToMaturity inverts it by bisection. bondRiskMeasures returns Macaulay and modified duration, convexity and DV01 from a single pass over the flows. nelsonSiegel builds a curve from level, slope and curvature; forwardRate extracts the implied future rate by no-arbitrage. mertonModel prices the firm's equity as a CALL on its assets struck at the face value of its debt, and reads the default probability and credit spread off the same d-terms.",
+    mathematics: {
+      intro:
+        "Discounting, its first two derivatives, and the reframing that turns a credit question into an option question.",
+      equations: [
+        {
+          label: "Bond price",
+          latex: "P = \\sum_{i=1}^{n} \\frac{C/f}{(1 + y/f)^{f t_i}} + \\frac{F}{(1 + y/f)^{f T}}",
+          note: "Everything else in this module is a derivative of this expression with respect to y.",
+        },
+        {
+          label: "Macaulay and modified duration",
+          latex: "D = \\frac{\\sum t_i\\, \\mathrm{PV}(CF_i)}{P}, \\qquad D_{\\text{mod}} = \\frac{D}{1 + y/f}",
+          note: "D is the present-value-weighted average time to payment — the balance point of the cash flows.",
+        },
+        {
+          label: "Second-order price change",
+          latex: "\\frac{\\Delta P}{P} \\approx -D_{\\text{mod}}\\,\\Delta y + \\tfrac{1}{2} C (\\Delta y)^2",
+          note: "The duration term is a tangent line. Because the price-yield curve is convex, that line sits below the truth on BOTH sides.",
+        },
+        {
+          label: "No-arbitrage forward rate",
+          latex: "(1 + y_2)^{t_2} = (1 + y_1)^{t_1}\\,(1 + f_{1,2})^{t_2 - t_1}",
+          note: "Lending once to t2 must equal lending to t1 and rolling. Otherwise the two strategies are an arbitrage.",
+        },
+        {
+          label: "Merton: equity as a call on the firm",
+          latex: "E_0 = V_0\\,\\Phi(d_1) - D e^{-rT}\\Phi(d_2), \\qquad E_T = \\max(V_T - D, 0)",
+          note: "Limited liability IS the option. Shareholders own the upside above the debt and can walk away below it.",
+        },
+      ],
+    },
+    whyItWorks: [
+      {
+        heading: "Why duration is a time and a sensitivity at once",
+        body: "Differentiate the price with respect to y. Every term (1 + y/f)^(−f·t) brings down a factor of −t/(1 + y/f), so the derivative is the present-value-weighted average of the times, divided by (1 + y/f). That weighted average is a number of years with a real physical meaning — the balance point of the cash flows on a time axis — and it is simultaneously the percentage price move per unit of yield. The two readings are the same arithmetic seen from either end.",
+      },
+      {
+        heading: "Why convexity is desirable rather than a correction",
+        body: "The price-yield relationship curves upward. A straight-line duration estimate therefore understates the price whether yields rise or fall: you lose less than duration predicts when rates rise, and gain more when they fall. That asymmetry is free, so convexity is something to own, and two bonds with identical duration are not interchangeable.",
+      },
+      {
+        heading: "Why cash flows are counted backwards",
+        body: "A 30-year semiannual bond has 60 coupons. Stepping forward by 0.5 from issue accumulates floating-point error and leaves the final principal payment slightly off the maturity date, which shifts duration by a visible amount. Counting back from maturity pins the one date that must be exact and pushes any residue to the nearest coupon, where it is immaterial.",
+      },
+      {
+        heading: "Why equity is an option",
+        body: "A shareholder in a limited-liability firm receives whatever remains after creditors are paid, and nothing if that is negative — they cannot be pursued for the shortfall. The payoff max(V_T − D, 0) is exactly a call option on the firm's assets struck at the face value of its debt. So Black-Scholes prices the equity, the debt is the residual V − E, and the default probability is Phi(−d2). The entire credit model is one substitution away from the option model.",
+      },
+      {
+        heading: "Why equity volatility exceeds asset volatility",
+        body: "Equity is a levered claim. Its volatility is sigma_V multiplied by the elasticity of the equity value with respect to the assets, which is (V/E)·Phi(d1) — greater than one whenever there is debt outstanding. In the lab a 25% asset volatility produces a 48.7% equity volatility, and the whole of that gap is leverage. It also runs the other way: the observable quantity is equity volatility, so impliedEquityVolatility exists to recover the asset volatility you cannot see.",
+      },
+    ],
+    variables: [
+      { symbol: "y", meaning: "Yield to maturity: the single rate that makes the discounted flows equal the price." },
+      { symbol: "f", meaning: "Coupon frequency per year, usually 2." },
+      { symbol: "D", meaning: "Macaulay duration in years — or, in the Merton section, the face value of debt." },
+      { symbol: "C", meaning: "Convexity — or the annual coupon, depending on the equation. The notation collides and the code does not." },
+      { symbol: "V_0", meaning: "Market value of the firm's assets today." },
+      { symbol: "\\sigma_V", meaning: "Asset volatility — unobservable, which is the central difficulty of the model." },
+      { symbol: "\\Phi(-d_2)", meaning: "Risk-neutral default probability." },
+    ],
+    assumptions: [
+      "A single yield discounts every cash flow, which is why yield to maturity is a summary rather than a model of the curve.",
+      "Coupons are reinvested at the yield — the reinvestment assumption buried inside YTM.",
+      "Nelson-Siegel curves are smooth in three factors. Real curves are not always.",
+      "Merton: the firm's assets follow geometric Brownian motion, there is a single zero-coupon debt issue, and default can only occur at maturity.",
+      "No taxes, no bankruptcy costs, and no renegotiation.",
+    ],
+    limitations: [
+      "Duration and convexity describe a PARALLEL shift. The PCA lab shows that level explains 96.5% of real curve variation — but the remaining slope and curvature moves are exactly the ones a duration hedge does not see.",
+      "Merton's default can only happen at maturity, so short-maturity credit spreads collapse toward zero. Observed short spreads do not, which is the model's most famous failure and good evidence that firms fail through jumps rather than a slow diffusion.",
+      "Asset value and asset volatility are both unobservable and must be backed out of equity, so the model's two most important inputs are estimates with their own error.",
+      "The risk-neutral default probability exceeds the real-world one — 23.69% against 14.14% in the lab's default case — because it carries a risk premium. Reading it as a forecast of actual defaults overstates them substantially.",
+    ],
+    failureModes: [
+      {
+        title: "Mixing annual and periodic rates",
+        body: "Discounting a semiannual coupon at the annual yield, or dividing by f twice, produces a price that is plausible and wrong. Duration moves with it, so nothing looks inconsistent internally.",
+      },
+      {
+        title: "Hedging duration and calling it hedged",
+        body: "A duration-neutral book is immunised against a parallel shift and nothing else. A steepening leaves it exposed, and the exposure is invisible in every duration report it produces.",
+      },
+      {
+        title: "Using duration alone for a large yield move",
+        body: "The tangent-line estimate understates the price in both directions, so a 200bp shock looks worse than it is on a long bond. approximatePriceChange exists to show the gap against the exact repricing.",
+      },
+      {
+        title: "Reading risk-neutral default probability as the real one",
+        body: "They differ by a risk premium and the gap is large. Capital decisions made on the risk-neutral number are systematically too conservative; pricing decisions made on the real-world number are systematically too cheap.",
+      },
+      {
+        title: "Forward rates read as forecasts",
+        body: "The forward rate is the rate that makes two lending strategies cost the same today. It is a no-arbitrage construction, not a prediction, and it is a poor one empirically.",
+      },
+    ],
+    beforeMovingOn:
+      "That the entire module is one expression — the discounted sum — and its first two derivatives, and that the step from a certain cash flow to an uncertain one is a change of claim rather than a change of mathematics. The arithmetic check worth remembering: in the Credit Lab the equity value of $46.16 and the debt value of $53.84 add to exactly the $100 firm value, because the two claims partition the firm and nothing else can be true.",
+    questions: [
+      {
+        question: "Two bonds have the same duration but different convexity. Which would you rather own, and what should it cost?",
+        answer:
+          "The more convex one, and it should cost more. Equal duration means equal first-order sensitivity, so they move together for small yield changes. For large moves in either direction the convex bond does better — it falls less when yields rise and gains more when they fall. That is a one-sided advantage, so it is not free, and the price difference is what you pay for it. The catch is that convexity is most valuable when yields move a lot, so you are buying volatility exposure and should price it accordingly.",
+      },
+      {
+        question: "Why do Merton credit spreads go to zero at short maturities, and why does that matter?",
+        answer:
+          "Because asset value diffuses continuously. Over a very short horizon, a firm whose assets exceed its debt today essentially cannot reach the default boundary, so the risk-neutral default probability and the spread both vanish. Real short-dated spreads are clearly positive. The discrepancy is informative rather than embarrassing: it says real firms default through sudden events — fraud discovered, a covenant breached, funding withdrawn — that a continuous path cannot produce. It is the main argument for jump-diffusion and reduced-form credit models.",
+      },
+      {
+        question: "Your equity volatility is 48.7% and the model says asset volatility is 25%. Where did the rest come from?",
+        answer:
+          "Leverage, entirely. Equity is a call on the assets, so its volatility is the asset volatility times the elasticity (V/E)·Phi(d1), which exceeds one whenever debt exists. No extra business risk is being added — the same asset uncertainty is concentrated into a smaller, junior claim. The practical consequence is that equity volatility is not a property of the business alone, and comparing it across firms with different capital structures compares their balance sheets as much as their operations.",
+      },
+    ],
+    quiz: [
+      "A 10-year bond has modified duration 8.2 and convexity 85. Estimate the price change for a +150bp move, with and without the convexity term, and say which is closer to the truth.",
+      "Why does a zero-coupon bond have Macaulay duration exactly equal to its maturity, while a coupon bond's is always less?",
+      "The 2-year yield is 4% and the 5-year is 4.6%. Compute the implied 2y-into-5y forward rate, then explain why it is not a forecast.",
+      "A firm's assets are worth $100 and its debt has face value $80 due in five years. State the equity payoff at maturity in both the solvent and insolvent cases, and name the option it matches.",
+      "Your bond book is duration-neutral and loses money on a day when the curve steepens and the 10-year yield is unchanged. Explain how, and what measure would have shown the exposure.",
+    ],
+  },
 ];
 
 export function getTeachingNote(module: number): TeachingNote | undefined {
