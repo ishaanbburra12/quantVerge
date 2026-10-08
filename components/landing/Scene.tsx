@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
@@ -81,7 +81,13 @@ interface CameraRigProps {
  * React never re-renders. Passing progress as state would reconcile the entire
  * scene graph several times per scrolled pixel.
  */
-function CameraRig({ progress, damping, parallax, compact, animating }: CameraRigProps): null {
+function CameraRig({
+  progress,
+  damping,
+  parallax,
+  compact,
+  animating,
+}: CameraRigProps): null {
   const camera = useThree((state) => state.camera);
   const pointer = useThree((state) => state.pointer);
 
@@ -106,7 +112,15 @@ function CameraRig({ progress, damping, parallax, compact, animating }: CameraRi
     currentLook.copy(targetLook);
     camera.lookAt(currentLook);
     invalidate();
-  }, [animating, compact, camera, invalidate, targetAt, targetLook, currentLook]);
+  }, [
+    animating,
+    compact,
+    camera,
+    invalidate,
+    targetAt,
+    targetLook,
+    currentLook,
+  ]);
 
   useFrame((_state, delta) => {
     if (!animating) return;
@@ -114,7 +128,7 @@ function CameraRig({ progress, damping, parallax, compact, animating }: CameraRi
 
     if (compact) {
       targetAt.y *= 0.92;
-      targetAt.z *= 0.80;
+      targetAt.z *= 0.8;
       targetLook.y -= 0.45;
     }
 
@@ -134,6 +148,106 @@ function CameraRig({ progress, damping, parallax, compact, animating }: CameraRi
   return null;
 }
 
+/**
+ * Guarantees the drawing buffer matches its container.
+ *
+ * React Three Fiber measures the Canvas once on mount and then relies on a
+ * ResizeObserver. If that first measurement lands while the tab is hidden —
+ * a background tab, a restored session, a cmd-clicked link — requestAnimationFrame
+ * is paused, the measurement never completes, and the canvas keeps the HTML
+ * default of 300x150 for the rest of its life. Nothing errors. The page simply
+ * shows the gradient fallback with a postage stamp of scene in the corner,
+ * and no amount of later scrolling fixes it, because the observer has already
+ * seen a container whose size never changes again.
+ *
+ * So the size is reconciled against the container directly, on mount, whenever
+ * the container resizes, and whenever the document becomes visible.
+ */
+function ViewportGuard(): null {
+  const gl = useThree((state) => state.gl);
+  const setSize = useThree((state) => state.setSize);
+  const invalidate = useThree((state) => state.invalidate);
+
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const container = canvas.parentElement;
+    if (!container) return;
+
+    const sync = (): void => {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      if (width <= 0 || height <= 0) return;
+      // Compare against what is actually laid out rather than against R3F's
+      // own size state, so a stale measurement cannot agree with itself.
+      if (canvas.clientWidth !== width || canvas.clientHeight !== height) {
+        setSize(width, height);
+      }
+      // Under reduced motion the loop runs on demand, so a frame requested
+      // while the tab was hidden was never painted. Ask for another.
+      invalidate();
+    };
+
+    sync();
+    const observer = new ResizeObserver(sync);
+    observer.observe(container);
+    document.addEventListener("visibilitychange", sync);
+
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+    };
+  }, [gl, setSize, invalidate]);
+
+  return null;
+}
+
+/**
+ * Nudges React Three Fiber into measuring its container.
+ *
+ * R3F measures once on mount and only creates its root — and therefore only
+ * mounts its children — once that measurement is non-zero. If the first
+ * measurement is missed or arrives late, which happens when the document is
+ * hidden on load because requestAnimationFrame is paused, the canvas sits at
+ * the HTML default of 300x150 and nothing inside the Canvas has mounted yet.
+ * That is why the guard inside it cannot fix this: it has not run.
+ *
+ * react-use-measure, which R3F uses, does listen for window resize. So the
+ * repair is to compare the canvas against its container from outside and emit
+ * one if they disagree. Bounded to a couple of seconds, because if it has not
+ * taken by then the cause is something this would not fix anyway.
+ */
+function useMeasurementNudge(
+  container: RefObject<HTMLDivElement | null>,
+): void {
+  useEffect(() => {
+    let attempts = 0;
+    let timer = 0;
+
+    const check = (): void => {
+      const element = container.current;
+      const canvas = element?.querySelector("canvas");
+      if (!element || !canvas) return;
+
+      const matched =
+        canvas.clientWidth === element.clientWidth &&
+        canvas.clientHeight === element.clientHeight;
+      if (matched || attempts >= 20) return;
+
+      attempts++;
+      window.dispatchEvent(new Event("resize"));
+      timer = window.setTimeout(check, 100);
+    };
+
+    timer = window.setTimeout(check, 0);
+    document.addEventListener("visibilitychange", check);
+
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", check);
+    };
+  }, [container]);
+}
+
 export interface SceneProps {
   readonly progress: RefObject<number>;
   readonly capabilities: Capabilities;
@@ -141,51 +255,78 @@ export interface SceneProps {
   readonly speed?: number;
 }
 
-export function Scene({ progress, capabilities, speed = 1 }: SceneProps): React.ReactElement {
+export function Scene({
+  progress,
+  capabilities,
+  speed = 1,
+}: SceneProps): React.ReactElement {
   const { compact, reducedMotion, maxDpr, postprocessing } = capabilities;
+  const container = useRef<HTMLDivElement>(null);
+  useMeasurementNudge(container);
 
   return (
-    <Canvas
-      // dpr as a [min, max] pair lets R3F settle on something the device can
-      // actually sustain instead of always asking for the native ratio.
-      dpr={[1, maxDpr]}
-      gl={{ antialias: !compact, powerPreference: "high-performance", alpha: false }}
-      camera={{ fov: compact ? 62 : 52, near: 0.1, far: 120, position: [...CAMERA_BEATS[0].at] }}
-      // Static scenes do not need a render loop at all; "demand" draws only
-      // when something invalidates, which on reduced motion is almost never.
-      frameloop={reducedMotion ? "demand" : "always"}
-    >
-      <color attach="background" args={[SCENE_BACKGROUND]} />
-      <fog attach="fog" args={[SCENE_BACKGROUND, compact ? 14 : 12, compact ? 46 : 34]} />
+    <div ref={container} className="h-full w-full">
+      <Canvas
+        // dpr as a [min, max] pair lets R3F settle on something the device can
+        // actually sustain instead of always asking for the native ratio.
+        dpr={[1, maxDpr]}
+        gl={{
+          antialias: !compact,
+          powerPreference: "high-performance",
+          alpha: false,
+        }}
+        camera={{
+          fov: compact ? 62 : 52,
+          near: 0.1,
+          far: 120,
+          position: [...CAMERA_BEATS[0].at],
+        }}
+        // Static scenes do not need a render loop at all; "demand" draws only
+        // when something invalidates, which on reduced motion is almost never.
+        frameloop={reducedMotion ? "demand" : "always"}
+      >
+        <ViewportGuard />
 
-      <CameraRig
-        progress={progress}
-        damping={reducedMotion ? 60 : 4.5}
-        parallax={!compact && !reducedMotion}
-        compact={compact}
-        animating={!reducedMotion}
-      />
+        <color attach="background" args={[SCENE_BACKGROUND]} />
+        <fog
+          attach="fog"
+          args={[SCENE_BACKGROUND, compact ? 14 : 12, compact ? 46 : 34]}
+        />
 
-      <VolatilitySurface
-        segments={compact ? 96 : 168}
-        accent={compact ? SCENE_ACCENT_COMPACT : SCENE_ACCENT}
-        deep={SCENE_DEEP}
-        animate={!reducedMotion}
-        speed={speed}
-      />
+        <CameraRig
+          progress={progress}
+          damping={reducedMotion ? 60 : 4.5}
+          parallax={!compact && !reducedMotion}
+          compact={compact}
+          animating={!reducedMotion}
+        />
 
-      <TickField
-        count={compact ? 220 : 720}
-        accent={compact ? SCENE_ACCENT_COMPACT : SCENE_ACCENT}
-        animate={!reducedMotion}
-        speed={speed}
-      />
+        <VolatilitySurface
+          segments={compact ? 96 : 168}
+          accent={compact ? SCENE_ACCENT_COMPACT : SCENE_ACCENT}
+          deep={SCENE_DEEP}
+          animate={!reducedMotion}
+          speed={speed}
+        />
 
-      {postprocessing ? (
-        <EffectComposer>
-          <Bloom intensity={0.9} luminanceThreshold={0.18} luminanceSmoothing={0.3} mipmapBlur />
-        </EffectComposer>
-      ) : null}
-    </Canvas>
+        <TickField
+          count={compact ? 220 : 720}
+          accent={compact ? SCENE_ACCENT_COMPACT : SCENE_ACCENT}
+          animate={!reducedMotion}
+          speed={speed}
+        />
+
+        {postprocessing ? (
+          <EffectComposer>
+            <Bloom
+              intensity={0.9}
+              luminanceThreshold={0.18}
+              luminanceSmoothing={0.3}
+              mipmapBlur
+            />
+          </EffectComposer>
+        ) : null}
+      </Canvas>
+    </div>
   );
 }
